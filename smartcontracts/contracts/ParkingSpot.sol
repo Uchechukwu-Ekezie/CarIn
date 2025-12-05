@@ -221,16 +221,28 @@ contract ParkingSpot is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Cancel a booking
+     * @notice Cancel a booking
+     * @dev Can be called by the renter or spot owner before the booking starts
+     * @param bookingId The ID of the booking to cancel
      */
-    function cancelBooking(uint256 bookingId) external {
+    function cancelBooking(uint256 bookingId) external nonReentrant {
         Booking storage booking = bookings[bookingId];
-        require(booking.user == msg.sender || spots[booking.spotId].owner == msg.sender, "Not authorized");
-        require(booking.isActive && !booking.isCancelled, "Booking is not active");
-        require(block.timestamp < booking.startTime, "Cannot cancel active booking");
+        if (booking.bookingId == 0) {
+            revert SpotDoesNotExist(); // Reuse error
+        }
+        if (booking.user != msg.sender && spots[booking.spotId].owner != msg.sender) {
+            revert NotAuthorized();
+        }
+        if (!booking.isActive || booking.isCancelled) {
+            revert BookingNotActive();
+        }
+        if (block.timestamp >= booking.startTime) {
+            revert CannotCancelActiveBooking();
+        }
 
         booking.isCancelled = true;
         booking.isActive = false;
+        // Make spot available again if no other active bookings
         spots[booking.spotId].isAvailable = true;
 
         emit BookingCancelled(bookingId, booking.spotId, msg.sender);
