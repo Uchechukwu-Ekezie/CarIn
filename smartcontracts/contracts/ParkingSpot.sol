@@ -2,11 +2,13 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title ParkingSpot
- * @dev Manages parking spot listings, bookings, and ownership
+ * @notice Manages parking spot listings, bookings, and ownership
+ * @dev This contract handles spot registration, availability management, and booking creation
+ * with time-based locks to prevent double-booking
  */
 contract ParkingSpot is Ownable, ReentrancyGuard {
     // Spot structure
