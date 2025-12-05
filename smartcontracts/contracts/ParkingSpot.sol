@@ -354,17 +354,48 @@ contract ParkingSpot is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Get spot details
+     * @notice Get spot details
+     * @param spotId The ID of the spot
+     * @return spot The spot struct
      */
     function getSpot(uint256 spotId) external view returns (Spot memory) {
         return spots[spotId];
     }
 
     /**
-     * @dev Get booking details
+     * @notice Get booking details
+     * @param bookingId The ID of the booking
+     * @return booking The booking struct
      */
     function getBooking(uint256 bookingId) external view returns (Booking memory) {
         return bookings[bookingId];
+    }
+
+    /**
+     * @notice Get all booking IDs for a spot
+     * @param spotId The ID of the spot
+     * @return bookingIds Array of booking IDs
+     */
+    function getSpotBookings(uint256 spotId) external view returns (uint256[] memory) {
+        return spotBookings[spotId];
+    }
+
+    /**
+     * @notice Get all spot IDs owned by an address
+     * @param owner The owner address
+     * @return spotIds Array of spot IDs
+     */
+    function getOwnerSpots(address owner) external view returns (uint256[] memory) {
+        return ownerSpots[owner];
+    }
+
+    /**
+     * @notice Get all booking IDs for a renter
+     * @param renter The renter address
+     * @return bookingIds Array of booking IDs
+     */
+    function getRenterBookings(address renter) external view returns (uint256[] memory) {
+        return userBookings[renter];
     }
 }
 
