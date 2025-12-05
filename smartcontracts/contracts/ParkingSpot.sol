@@ -11,6 +11,20 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  * with time-based locks to prevent double-booking
  */
 contract ParkingSpot is Ownable, ReentrancyGuard {
+    // Custom errors for gas optimization
+    error InvalidPrice();
+    error SpotDoesNotExist();
+    error SpotNotAvailable();
+    error InvalidTimeRange();
+    error StartTimeInPast();
+    error NotAuthorized();
+    error BookingNotActive();
+    error CannotCancelActiveBooking();
+    error NotSpotOwner();
+    error CannotBookOwnSpot();
+    error TimeSlotAlreadyBooked();
+    error InvalidOwner();
+
     // Spot structure
     struct Spot {
         uint256 id;
