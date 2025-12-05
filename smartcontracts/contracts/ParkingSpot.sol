@@ -6,9 +6,24 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title ParkingSpot
- * @notice Manages parking spot listings, bookings, and ownership
- * @dev This contract handles spot registration, availability management, and booking creation
- * with time-based locks to prevent double-booking
+ * @notice Manages parking spot listings, bookings, and ownership for a decentralized parking marketplace
+ * @dev This contract handles:
+ *      - Spot registration with location and pricing
+ *      - Time-based booking creation with automatic conflict detection
+ *      - Ownership management and transfer
+ *      - Availability management
+ *      - Booking lifecycle (creation, cancellation, completion)
+ * 
+ * Security Features:
+ *      - ReentrancyGuard on all state-changing functions
+ *      - Custom errors for gas optimization
+ *      - Access control via OpenZeppelin Ownable and custom modifiers
+ *      - Time-based locks prevent double-booking
+ * 
+ * Gas Optimizations:
+ *      - Struct storage packing
+ *      - Custom errors instead of require strings
+ *      - Efficient mapping structures
  */
 contract ParkingSpot is Ownable, ReentrancyGuard {
     // Custom errors for gas optimization
