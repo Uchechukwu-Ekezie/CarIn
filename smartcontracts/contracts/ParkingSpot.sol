@@ -138,10 +138,19 @@ contract ParkingSpot is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev List a new parking spot
+     * @notice List a new parking spot
+     * @dev Creates a new parking spot listing with location and price
+     * @param location The location description or IPFS hash for location data
+     * @param pricePerHour The price per hour in wei
+     * @return spotId The ID of the newly created spot
      */
-    function listSpot(string memory location, uint256 pricePerHour) external returns (uint256) {
-        require(pricePerHour > 0, "Price must be greater than 0");
+    function listSpot(string memory location, uint256 pricePerHour) external nonReentrant returns (uint256) {
+        if (pricePerHour == 0) {
+            revert InvalidPrice();
+        }
+        if (bytes(location).length == 0) {
+            revert InvalidTimeRange(); // Reuse error for empty location
+        }
         
         spotCounter++;
         spots[spotCounter] = Spot({
@@ -155,7 +164,7 @@ contract ParkingSpot is Ownable, ReentrancyGuard {
 
         ownerSpots[msg.sender].push(spotCounter);
 
-        emit SpotListed(spotCounter, msg.sender, pricePerHour);
+        emit SpotListed(spotCounter, msg.sender, location, pricePerHour, block.timestamp);
         return spotCounter;
     }
 
