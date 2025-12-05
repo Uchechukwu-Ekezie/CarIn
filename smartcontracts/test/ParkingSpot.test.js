@@ -81,11 +81,13 @@ describe("ParkingSpot", function () {
     });
 
     it("Should create a booking successfully", async function () {
-      await expect(
-        parkingSpot.connect(renter).createBooking(spotId, futureStartTime, futureEndTime)
-      )
+      const tx = await parkingSpot.connect(renter).createBooking(spotId, futureStartTime, futureEndTime);
+      const receipt = await tx.wait();
+      const booking = await parkingSpot.getBooking(1);
+      
+      await expect(tx)
         .to.emit(parkingSpot, "BookingCreated")
-        .withArgs(1, spotId, renter.address, futureStartTime, futureEndTime, anyValue);
+        .withArgs(1, spotId, renter.address, futureStartTime, futureEndTime, booking.totalPrice);
       
       const booking = await parkingSpot.getBooking(1);
       expect(booking.spotId).to.equal(spotId);
@@ -122,6 +124,58 @@ describe("ParkingSpot", function () {
       await expect(
         parkingSpot.connect(renter).createBooking(spotId, pastTime, futureEndTime)
       ).to.be.revertedWithCustomError(parkingSpot, "StartTimeInPast");
+    });
+  });
+
+  describe("Time-Based Booking Locks", function () {
+    let spotId;
+    let futureStartTime;
+    let futureEndTime;
+
+    beforeEach(async function () {
+      spotId = 1;
+      await parkingSpot.connect(spotOwner).listSpot("123 Main St", ethers.parseEther("1"));
+      
+      const block = await ethers.provider.getBlock("latest");
+      futureStartTime = block.timestamp + 3600;
+      futureEndTime = futureStartTime + 7200;
+    });
+
+    it("Should prevent double-booking for overlapping time slots", async function () {
+      await parkingSpot.connect(renter).createBooking(spotId, futureStartTime, futureEndTime);
+      
+      // Try to book overlapping time
+      const overlappingStart = futureStartTime + 1800; // 30 min after first booking starts
+      const overlappingEnd = futureEndTime + 1800; // 30 min after first booking ends
+      
+      await expect(
+        parkingSpot.connect(renter).createBooking(spotId, overlappingStart, overlappingEnd)
+      ).to.be.revertedWithCustomError(parkingSpot, "TimeSlotAlreadyBooked");
+    });
+
+    it("Should allow non-overlapping bookings", async function () {
+      await parkingSpot.connect(renter).createBooking(spotId, futureStartTime, futureEndTime);
+      
+      // Book a time slot after the first one ends
+      const nextStart = futureEndTime + 100;
+      const nextEnd = nextStart + 3600;
+      
+      await expect(
+        parkingSpot.connect(renter).createBooking(spotId, nextStart, nextEnd)
+      ).to.emit(parkingSpot, "BookingCreated");
+    });
+
+    it("Should check time slot availability correctly", async function () {
+      await parkingSpot.connect(renter).createBooking(spotId, futureStartTime, futureEndTime);
+      
+      const isAvailable = await parkingSpot.isTimeSlotAvailable(spotId, futureStartTime, futureEndTime);
+      expect(isAvailable).to.be.false;
+      
+      // Check availability for a future non-overlapping slot
+      const futureSlotStart = futureEndTime + 1000;
+      const futureSlotEnd = futureSlotStart + 3600;
+      const isAvailableFuture = await parkingSpot.isTimeSlotAvailable(spotId, futureSlotStart, futureSlotEnd);
+      expect(isAvailableFuture).to.be.true;
     });
   });
 
