@@ -43,17 +43,20 @@ export default function BookingPage() {
     return (
       <main className="min-h-screen p-8 bg-gray-50">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center py-12">Loading spot details...</div>
+          <BookingLoading />
         </div>
       </main>
     );
   }
 
-  if (!spot) {
+  if (error || !spot) {
     return (
       <main className="min-h-screen p-8 bg-gray-50">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center py-12">Spot not found</div>
+          <div className="text-center py-12">
+            <p className="text-red-600 mb-2">Error loading spot</p>
+            <p className="text-sm text-gray-500">{error || "Spot not found"}</p>
+          </div>
         </div>
       </main>
     );
@@ -81,12 +84,14 @@ export default function BookingPage() {
   }
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-4xl mx-auto">
-        <SpotDetails spot={spot} />
-        <BookingFlow spot={spot} userAddress={address!} />
-      </div>
-    </main>
+    <BookingErrorBoundary>
+      <main className="min-h-screen p-8 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <SpotDetails spot={spot} />
+          <BookingFlow spot={spot} userAddress={address!} />
+        </div>
+      </main>
+    </BookingErrorBoundary>
   );
 }
 
