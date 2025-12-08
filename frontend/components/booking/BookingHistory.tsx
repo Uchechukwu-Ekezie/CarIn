@@ -29,45 +29,23 @@ export default function BookingHistory({ userAddress }: BookingHistoryProps) {
     fetchBookings();
   }, [userAddress]);
 
-  const fetchBookings = async () => {
-    setLoading(true);
-    try {
-      // TODO: Fetch from smart contract or backend
-      const mockBookings: Booking[] = [
-        {
-          id: "booking_1",
-          spotId: "1",
-          spotLocation: "123 Main St, San Francisco, CA",
-          date: "2024-12-05",
-          startTime: "09:00",
-          endTime: "17:00",
-          totalCost: "20.00",
-          status: "confirmed",
-          transactionHash: "0x123...abc",
-        },
-        {
-          id: "booking_2",
-          spotId: "2",
-          spotLocation: "456 Market St, San Francisco, CA",
-          date: "2024-12-04",
-          startTime: "10:00",
-          endTime: "14:00",
-          totalCost: "12.50",
-          status: "completed",
-          transactionHash: "0x456...def",
-        },
-      ];
-      setBookings(mockBookings);
-    } catch (error) {
-      console.error("Error fetching bookings:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const filteredBookings = bookings.filter((booking) => {
-    if (filter === "all") return true;
-    return booking.status === filter;
+    // Filter by status
+    if (filter !== "all" && booking.status !== filter) {
+      return false;
+    }
+    
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        booking.spotLocation.toLowerCase().includes(query) ||
+        booking.id.toLowerCase().includes(query)
+      );
+    }
+    
+    return true;
   });
 
   if (loading) {
@@ -77,23 +55,12 @@ export default function BookingHistory({ userAddress }: BookingHistoryProps) {
   return (
     <div>
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow mb-6 p-4">
-        <div className="flex gap-2">
-          {(["all", "pending", "active", "completed"] as const).map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilter(status)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filter === status
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </button>
-          ))}
-        </div>
-      </div>
+      <BookingFilters
+        filter={filter}
+        onFilterChange={setFilter}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
 
       {/* Bookings List */}
       {filteredBookings.length === 0 ? (
