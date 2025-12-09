@@ -48,3 +48,21 @@ body {
     display: none;
   }
 }
+
+/* Leaflet map styles */
+.leaflet-container {
+  font-family: inherit;
+}
+
+.spot-popup .leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  padding: 0;
+}
+
+.spot-popup .leaflet-popup-content {
+  margin: 0;
+}
+
+.spot-info-window {
+  font-family: inherit;
+}
