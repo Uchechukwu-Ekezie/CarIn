@@ -3,6 +3,22 @@
 import { useRewardReports, useReferrals } from "@/lib/hooks/useRewards";
 import { formatDistanceToNow } from "date-fns";
 
+// Fallback if date-fns is not available
+const formatTimeAgo = (timestamp: number) => {
+  try {
+    return formatDistanceToNow(new Date(timestamp * 1000), { addSuffix: true });
+  } catch {
+    const seconds = Math.floor((Date.now() / 1000) - timestamp);
+    if (seconds < 60) return `${seconds} seconds ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} minutes ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hours ago`;
+    const days = Math.floor(hours / 24);
+    return `${days} days ago`;
+  }
+};
+
 export default function RewardHistory() {
   const { reports, loading: reportsLoading } = useRewardReports();
   const { referrals, loading: referralsLoading } = useReferrals();
@@ -52,7 +68,7 @@ export default function RewardHistory() {
                   {getClaimStatusBadge(report.claimStatus)}
                 </div>
                 <div className="flex items-center justify-between text-sm text-gray-500 mt-2">
-                  <span>{formatDistanceToNow(new Date(report.timestamp * 1000), { addSuffix: true })}</span>
+                  <span>{formatTimeAgo(report.timestamp)}</span>
                   {report.rewardAmount !== "0.0" && (
                     <span className="font-semibold text-green-600">
                       +{report.rewardAmount} CARIN
@@ -84,7 +100,7 @@ export default function RewardHistory() {
                   {getClaimStatusBadge(referral.claimStatus)}
                 </div>
                 <div className="flex items-center justify-between text-sm text-gray-500 mt-2">
-                  <span>{formatDistanceToNow(new Date(referral.timestamp * 1000), { addSuffix: true })}</span>
+                  <span>{formatTimeAgo(referral.timestamp)}</span>
                   {referral.rewardAmount !== "0.0" && (
                     <span className="font-semibold text-green-600">
                       +{referral.rewardAmount} CARIN
