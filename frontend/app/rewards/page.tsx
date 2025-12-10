@@ -1,10 +1,10 @@
 "use client";
 
 import { useRewards } from "@/lib/hooks/useRewards";
-import { RewardBalance } from "@/lib/hooks/useRewards";
 import { RewardType } from "@/lib/contracts/rewardsManager";
 import { useAccount } from "wagmi";
 import WalletConnect from "@/components/WalletConnect";
+import Link from "next/link";
 
 export default function RewardsPage() {
   const { address, isConnected } = useAccount();
