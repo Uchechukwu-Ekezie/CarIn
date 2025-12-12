@@ -289,9 +289,8 @@ contract DisputeResolution is Ownable, ReentrancyGuard, Pausable {
 
         // File dispute in PaymentEscrow first
         paymentEscrow.fileDispute(escrowId, reason, evidenceHash);
-        PaymentEscrow.Dispute memory escrowDispute = paymentEscrow.getDispute(
-            paymentEscrow.disputeCounter()
-        );
+        // Get the dispute ID from escrow mapping
+        uint256 escrowDisputeId = paymentEscrow.escrowToDispute(escrowId);
 
         disputeCounter++;
         address opposingParty = msg.sender == escrow.payer ? escrow.payee : escrow.payer;
@@ -531,11 +530,14 @@ contract DisputeResolution is Ownable, ReentrancyGuard, Pausable {
         dispute.refundPercentage = refundPercentage;
         dispute.resolutionType = resolutionType;
 
+        // Get the PaymentEscrow dispute ID
+        uint256 escrowDisputeId = paymentEscrow.escrowToDispute(dispute.escrowId);
+        
         if (refundApproved) {
             if (refundPercentage == 100) {
                 // Full refund via PaymentEscrow
                 paymentEscrow.resolveDispute(
-                    paymentEscrow.getDisputeByEscrowId(dispute.escrowId).disputeId,
+                    escrowDisputeId,
                     true,
                     0,
                     0
@@ -545,7 +547,7 @@ contract DisputeResolution is Ownable, ReentrancyGuard, Pausable {
                 uint256 refundAmount = (escrow.amount * refundPercentage) / 100;
                 uint256 releaseAmount = escrow.amount - refundAmount;
                 paymentEscrow.resolveDispute(
-                    paymentEscrow.getDisputeByEscrowId(dispute.escrowId).disputeId,
+                    escrowDisputeId,
                     true,
                     refundAmount,
                     releaseAmount
@@ -554,7 +556,7 @@ contract DisputeResolution is Ownable, ReentrancyGuard, Pausable {
         } else {
             // No refund - release to payee
             paymentEscrow.resolveDispute(
-                paymentEscrow.getDisputeByEscrowId(dispute.escrowId).disputeId,
+                escrowDisputeId,
                 false,
                 0,
                 0
