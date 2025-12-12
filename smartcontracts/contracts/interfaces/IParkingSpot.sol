@@ -21,8 +21,10 @@ interface IParkingSpot {
         address user;
         uint256 startTime;
         uint256 endTime;
+        uint256 totalPrice;
         bool isActive;
         bool isCancelled;
+        bool isCompleted;
     }
 
     function getSpot(uint256 spotId) external view returns (Spot memory);
