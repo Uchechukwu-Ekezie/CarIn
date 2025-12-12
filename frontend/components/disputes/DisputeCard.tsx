@@ -3,6 +3,7 @@
 import { DisputeDetails, ResolutionType } from '@/lib/contracts/disputeResolution';
 import { formatEvidenceType } from '@/lib/utils/evidenceHandler';
 import { formatDistanceToNow } from 'date-fns';
+import DisputeStatusBadge from './DisputeStatusBadge';
 
 interface DisputeCardProps {
   dispute: DisputeDetails;
@@ -10,34 +11,6 @@ interface DisputeCardProps {
 }
 
 export default function DisputeCard({ dispute, onClick }: DisputeCardProps) {
-  const formatResolutionType = (type: ResolutionType) => {
-    switch (type) {
-      case ResolutionType.Automated:
-        return 'Automated';
-      case ResolutionType.PendingVote:
-        return 'Pending Vote';
-      case ResolutionType.Manual:
-        return 'Manual Review';
-      default:
-        return 'Unknown';
-    }
-  };
-
-  const getStatusColor = () => {
-    if (dispute.isResolved) {
-      return dispute.refundApproved ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
-    }
-    return 'bg-yellow-100 text-yellow-800';
-  };
-
-  const getStatusText = () => {
-    if (dispute.isResolved) {
-      return dispute.refundApproved
-        ? `Resolved - ${Number(dispute.refundPercentage)}% Refund Approved`
-        : 'Resolved - Refund Denied';
-    }
-    return formatResolutionType(dispute.resolutionType);
-  };
 
   return (
     <div
@@ -53,9 +26,12 @@ export default function DisputeCard({ dispute, onClick }: DisputeCardProps) {
             Booking #{dispute.bookingId.toString()} • Escrow #{dispute.escrowId.toString()}
           </p>
         </div>
-        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor()}`}>
-          {getStatusText()}
-        </span>
+        <DisputeStatusBadge
+          isResolved={dispute.isResolved}
+          refundApproved={dispute.isResolved ? dispute.refundApproved : null}
+          resolutionType={dispute.resolutionType}
+          refundPercentage={dispute.refundPercentage}
+        />
       </div>
 
       <div className="mb-4">
