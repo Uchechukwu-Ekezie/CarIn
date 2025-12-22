@@ -102,3 +102,5 @@ export default function QRCodeDisplay({
     </div>
   );
 }
+
+

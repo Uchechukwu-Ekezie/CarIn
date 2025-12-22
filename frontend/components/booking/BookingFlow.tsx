@@ -120,3 +120,5 @@ export default function BookingFlow({ spot, userAddress }: BookingFlowProps) {
     </div>
   );
 }
+
+

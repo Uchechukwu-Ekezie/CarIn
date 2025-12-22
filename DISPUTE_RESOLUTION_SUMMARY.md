@@ -132,3 +132,5 @@ Key configuration parameters:
 - Oracle integration ready for external evidence verification
 
 
+
+

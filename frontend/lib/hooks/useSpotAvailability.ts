@@ -74,3 +74,5 @@ export function useSpotAvailability(spots: ParkingSpot[]) {
 }
 
 
+
+

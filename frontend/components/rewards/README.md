@@ -68,3 +68,5 @@ All components use the `useRewards` hooks from `@/lib/hooks/useRewards`:
 Components use Tailwind CSS and follow the design system used throughout the CarIn application.
 
 
+
+

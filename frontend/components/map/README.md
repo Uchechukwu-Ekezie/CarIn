@@ -202,3 +202,5 @@ The map integration is prepared for smart contract integration:
 Part of the CarIn parking platform.
 
 
+
+

@@ -111,3 +111,5 @@ export async function validateQRCodeData(
 
   return { valid: true };
 }
+
+
