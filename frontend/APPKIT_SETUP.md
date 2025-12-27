@@ -13,7 +13,7 @@ This guide explains how to set up Reown AppKit (formerly WalletConnect) for the 
 
 1. Go to [Reown Cloud](https://cloud.reown.com) and sign in (or create an account)
 2. Create a new project or select an existing one
-3. Copy your **Project ID** from the project dashboard
+3. 
 
 ### 2. Configure Environment Variables
 
