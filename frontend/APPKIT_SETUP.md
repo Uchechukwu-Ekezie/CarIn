@@ -18,8 +18,7 @@ This guide explains how to set up Reown AppKit (formerly WalletConnect) for the 
 Create a `.env.local` file in the `frontend/` directory:
 
 ```bash
-# WalletConnect / Reown AppKit Configuration
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
+# WalletConnect / Reown AppONNECT_PROJECT_ID=your_project_id_here
 
 # Celo Network Configuration
 NEXT_PUBLIC_CELO_RPC_URL=https://alfajores-forno.celo-testnet.org
