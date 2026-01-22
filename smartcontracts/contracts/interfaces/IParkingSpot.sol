@@ -30,5 +30,6 @@ interface IParkingSpot {
     function getSpot(uint256 spotId) external view returns (Spot memory);
     function getBooking(uint256 bookingId) external view returns (Booking memory);
     function spotCounter() external view returns (uint256);
+    function spotMultiCounter() external view returns (uint256[]);
 }
 
