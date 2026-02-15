@@ -46,6 +46,6 @@ npx hardhat compile
 ### Smart Contracts
 
 - `npx hardhat test`: Executes the test suite.
-- `npx hardhat deploy --network mumbai`: Deploys contracts to the Mumbai testnet.
+- `npx hardhat deploy --network base`: Deploys contracts to the Mumbai testnet.
 
 By following these instructions, you'll have a fully functional local environment for both the frontend and smart contracts.
