@@ -8,4 +8,3 @@ To report a vulnerability, please email us at [security@example.com](mailto:secu
 
 We kindly ask you not to disclose the vulnerability publicly until we have had a chance to address it. We will do our best to resolve the issue as quickly as possible and will keep you updated on our progress.
 
-Thank you for helping to keep our project secure.
