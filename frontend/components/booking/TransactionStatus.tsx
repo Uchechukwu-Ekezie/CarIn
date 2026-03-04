@@ -46,12 +46,12 @@ export default function TransactionStatus({
         <p className="text-lg text-gray-700 font-medium">Transaction Confirmed!</p>
         {transactionHash && (
           <a
-            href={`https://alfajores.celoscan.io/tx/${transactionHash}`}
+            href={`https://explorer.hiro.so/txid/${transactionHash}?chain=testnet`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-blue-600 hover:underline mt-2 inline-block"
+            className="text-sm text-indigo-400 hover:text-indigo-300 font-bold tracking-tight mt-2 inline-block"
           >
-            View on CeloScan
+            View on Stacks Explorer
           </a>
         )}
       </div>

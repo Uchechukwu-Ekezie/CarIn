@@ -5,6 +5,7 @@ const nextConfig = {
   images: {
     domains: ['ipfs.io'],
   },
+  transpilePackages: ['@stacks/connect', '@stacks/connect-ui', '@stacks/connect-react'],
 };
 
 module.exports = nextConfig;

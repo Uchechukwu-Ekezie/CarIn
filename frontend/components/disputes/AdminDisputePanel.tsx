@@ -1,37 +1,33 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useStacksAuth } from '@/lib/providers/AppKitProvider';
 import { useDisputeResolution, useDisputeDetails, useDisputeEvidence, useDisputeVotes } from '@/lib/hooks/useDisputeResolution';
 import { ResolutionType } from '@/lib/contracts/disputeResolution';
-import EvidenceDisplay from './EvidenceDisplay';
-import { useWaitForTransactionReceipt } from 'wagmi';
+// EvidenceDisplay might need update if it uses wagmi/viem
+// import EvidenceDisplay from './EvidenceDisplay'; 
 
 interface AdminDisputePanelProps {
-  disputeId: bigint;
+  disputeId: string;
 }
 
 export default function AdminDisputePanel({ disputeId }: AdminDisputePanelProps) {
-  const { address } = useAccount();
+  const { stxAddress: address } = useStacksAuth();
   const { dispute, isLoading: loadingDispute } = useDisputeDetails(disputeId);
   const { evidence, isLoading: loadingEvidence } = useDisputeEvidence(disputeId);
   const { votes, isLoading: loadingVotes } = useDisputeVotes(disputeId);
-  const { resolveDisputeManually, submitVote, hash } = useDisputeResolution();
+  const { resolveDisputeManually, submitVote, isPending } = useDisputeResolution();
 
   const [refundApproved, setRefundApproved] = useState(true);
   const [refundPercentage, setRefundPercentage] = useState(100);
   const [voteJustification, setVoteJustification] = useState('');
   const [resolving, setResolving] = useState(false);
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash,
-  });
-
   const handleManualResolution = async () => {
     if (!dispute || resolving) return;
     setResolving(true);
     try {
-      await resolveDisputeManually(disputeId, refundApproved, BigInt(refundPercentage));
+      await resolveDisputeManually(disputeId, refundApproved, refundPercentage);
     } catch (error) {
       console.error('Resolution error:', error);
       setResolving(false);
@@ -44,7 +40,7 @@ export default function AdminDisputePanel({ disputeId }: AdminDisputePanelProps)
       return;
     }
     try {
-      await submitVote(disputeId, refundApproved, BigInt(refundPercentage), voteJustification);
+      await submitVote(disputeId, refundApproved, refundPercentage, voteJustification);
     } catch (error) {
       console.error('Vote error:', error);
     }
@@ -52,29 +48,10 @@ export default function AdminDisputePanel({ disputeId }: AdminDisputePanelProps)
 
   if (loadingDispute || !dispute) {
     return (
-      <div className="p-6 bg-white rounded-lg shadow-md">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-32 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (dispute.isResolved) {
-    return (
-      <div className="p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Dispute #{dispute.disputeId.toString()}</h2>
-        <div className="p-4 bg-gray-50 rounded-lg">
-          <p className="text-lg font-semibold">
-            Status: Resolved
-          </p>
-          <p className="text-gray-700 mt-2">
-            Refund: {dispute.refundApproved ? `${Number(dispute.refundPercentage)}% approved` : 'Denied'}
-          </p>
-          <p className="text-sm text-gray-600 mt-2">
-            Resolved by: {dispute.resolvedBy.slice(0, 6)}...{dispute.resolvedBy.slice(-4)}
-          </p>
+      <div className="p-8 glass-card border border-white/10 rounded-3xl">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-white/5 rounded-xl w-1/4"></div>
+          <div className="h-48 bg-white/5 rounded-2xl"></div>
         </div>
       </div>
     );
@@ -83,126 +60,44 @@ export default function AdminDisputePanel({ disputeId }: AdminDisputePanelProps)
   const isVotingPhase = dispute.resolutionType === ResolutionType.PendingVote;
 
   return (
-    <div className="space-y-6">
-      <div className="p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Dispute #{dispute.disputeId.toString()}</h2>
+    <div className="space-y-6 animate-fade-in-up">
+      <div className="p-8 glass-card border border-white/10 rounded-3xl">
+        <h2 className="text-2xl font-bold text-white mb-6">Dispute #{dispute.disputeId}</h2>
 
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">Booking ID</p>
-            <p className="text-lg font-semibold">{dispute.bookingId.toString()}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
+            <p className="text-xs font-semibold text-indigo-400 uppercase tracking-wider mb-1">Booking ID</p>
+            <p className="text-xl font-bold text-white">{dispute.bookingId}</p>
           </div>
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">Escrow ID</p>
-            <p className="text-lg font-semibold">{dispute.escrowId.toString()}</p>
+          <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
+            <p className="text-xs font-semibold text-purple-400 uppercase tracking-wider mb-1">Escrow ID</p>
+            <p className="text-xl font-bold text-white">{dispute.escrowId}</p>
           </div>
         </div>
 
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">Reason</h3>
-          <p className="text-gray-700 p-4 bg-gray-50 rounded-lg">{dispute.reason}</p>
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold text-white mb-3">Reason</h3>
+          <div className="p-6 bg-white/5 border border-white/10 rounded-2xl text-gray-300">
+            {dispute.reason}
+          </div>
         </div>
-
-        {evidence && evidence.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Evidence</h3>
-            <div className="space-y-4">
-              {evidence.map((ev) => (
-                <EvidenceDisplay key={ev.evidenceId.toString()} evidence={ev} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {isVotingPhase && votes && votes.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Votes ({votes.length})</h3>
-            <div className="space-y-2">
-              {votes.map((vote, index) => (
-                <div key={index} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium">{vote.voter.slice(0, 6)}...{vote.voter.slice(-4)}</p>
-                      <p className="text-sm text-gray-600 mt-1">{vote.justification}</p>
-                    </div>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      vote.supportsRefund ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {vote.supportsRefund ? 'Refund' : 'Deny'}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {isVotingPhase ? (
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Submit Vote</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={refundApproved}
-                    onChange={(e) => setRefundApproved(e.target.checked)}
-                    className="rounded"
-                  />
-                  <span>Support refund</span>
-                </label>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Refund Percentage (if approved)
-                </label>
+          <div className="p-8 bg-indigo-500/10 border border-indigo-500/20 rounded-3xl">
+            <h3 className="text-xl font-bold text-white mb-6">Submit Decision</h3>
+            <div className="space-y-6">
+              <label className="flex items-center space-x-3 cursor-pointer group">
                 <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={refundPercentage}
-                  onChange={(e) => setRefundPercentage(Number(e.target.value))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  type="checkbox"
+                  checked={refundApproved}
+                  onChange={(e) => setRefundApproved(e.target.checked)}
+                  className="w-5 h-5 rounded border-white/10 bg-white/5 text-indigo-600 focus:ring-indigo-500"
                 />
-              </div>
+                <span className="text-gray-200 group-hover:text-white transition-colors">Support refund request</span>
+              </label>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Justification *
-                </label>
-                <textarea
-                  value={voteJustification}
-                  onChange={(e) => setVoteJustification(e.target.value)}
-                  rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  placeholder="Explain your vote..."
-                />
-              </div>
-              <button
-                onClick={handleVote}
-                disabled={isConfirming || !voteJustification.trim()}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
-              >
-                {isConfirming ? 'Submitting...' : 'Submit Vote'}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Manual Resolution</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={refundApproved}
-                    onChange={(e) => setRefundApproved(e.target.checked)}
-                    className="rounded"
-                  />
-                  <span>Approve refund</span>
-                </label>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-400 mb-2">
                   Refund Percentage (0-100)
                 </label>
                 <input
@@ -211,24 +106,38 @@ export default function AdminDisputePanel({ disputeId }: AdminDisputePanelProps)
                   max="100"
                   value={refundPercentage}
                   onChange={(e) => setRefundPercentage(Number(e.target.value))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">
+                  Justification <span className="text-red-400 text-xs">*Required</span>
+                </label>
+                <textarea
+                  value={voteJustification}
+                  onChange={(e) => setVoteJustification(e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-3 bg-black/20 border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  placeholder="Explain the reasoning behind your decision..."
+                />
+              </div>
+
               <button
-                onClick={handleManualResolution}
-                disabled={resolving || isConfirming}
-                className="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:bg-gray-400"
+                onClick={handleVote}
+                disabled={isPending || !voteJustification.trim()}
+                className="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
               >
-                {resolving || isConfirming ? 'Resolving...' : 'Resolve Dispute'}
+                {isPending ? 'Submitting Decision...' : 'Commit Decision'}
               </button>
             </div>
+          </div>
+        ) : (
+          <div className="p-8 bg-amber-500/10 border border-amber-500/20 rounded-3xl text-center">
+            <p className="text-amber-200">This dispute is currently awaiting manual moderator review.</p>
           </div>
         )}
       </div>
     </div>
   );
 }
-
-
-
-

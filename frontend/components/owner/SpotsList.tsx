@@ -65,7 +65,7 @@ export default function SpotsList({ address, refreshTrigger }: SpotsListProps) {
       // TODO: Call smart contract to deactivate/remove spot
       console.log("Deactivating spot:", spotId);
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       setSpots(prev => prev.filter(s => s.id !== spotId));
       alert("Spot removed successfully");
     } catch (error) {
@@ -79,7 +79,7 @@ export default function SpotsList({ address, refreshTrigger }: SpotsListProps) {
       // TODO: Call smart contract to toggle availability
       console.log("Toggling availability for spot:", spotId);
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       setSpots(prev =>
         prev.map(spot =>
           spot.id === spotId ? { ...spot, isAvailable: !spot.isAvailable } : spot
@@ -111,7 +111,7 @@ export default function SpotsList({ address, refreshTrigger }: SpotsListProps) {
 
       {spots.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-600 mb-4">You haven't listed any spots yet.</p>
+          <p className="text-gray-600 mb-4">You haven&apos;t listed any spots yet.</p>
           <p className="text-sm text-gray-500">List your first spot to start earning!</p>
         </div>
       ) : (

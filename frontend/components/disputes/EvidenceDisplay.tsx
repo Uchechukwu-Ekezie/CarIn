@@ -11,43 +11,44 @@ interface EvidenceDisplayProps {
 
 export default function EvidenceDisplay({ evidence }: EvidenceDisplayProps) {
   const evidenceUrl = evidence.evidenceHash.startsWith('0x')
-    ? null // Bytes hash, needs conversion
+    ? null
     : getIPFSGatewayURL(evidence.evidenceHash);
 
-  const isImage = evidence.evidenceType === 2; // Image type
-  const isVideo = evidence.evidenceType === 3; // Video type
+  const isImage = evidence.evidenceType === 2;
+  const isVideo = evidence.evidenceType === 3;
 
   return (
-    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-      <div className="flex justify-between items-start mb-3">
+    <div className="p-8 glass-card border border-white/10 rounded-[2.5rem] group hover:bg-white/[0.04] transition-all">
+      <div className="flex justify-between items-start mb-6">
         <div>
-          <h4 className="font-semibold text-gray-800">
+          <h4 className="text-xl font-bold text-white mb-2">
             {formatEvidenceType(evidence.evidenceType as any)}
           </h4>
-          <p className="text-sm text-gray-600 mt-1">
-            Submitted by {evidence.submittedBy.slice(0, 6)}...{evidence.submittedBy.slice(-4)}
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+            Payload by <span className="text-indigo-400 font-bold">{evidence.submittedBy.slice(0, 6)}...{evidence.submittedBy.slice(-4)}</span>
           </p>
         </div>
-        <span className="text-xs text-gray-500">
-          {formatDistanceToNow(new Date(Number(evidence.timestamp) * 1000), { addSuffix: true })}
-        </span>
+        <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+          {formatDistanceToNow(new Date(evidence.timestamp), { addSuffix: true })}
+        </div>
       </div>
 
       {evidence.description && (
-        <p className="text-gray-700 mb-3">{evidence.description}</p>
+        <div className="mb-6 p-4 bg-white/5 border-l-2 border-indigo-500 rounded-r-xl">
+          <p className="text-gray-400 text-sm leading-relaxed">{evidence.description}</p>
+        </div>
       )}
 
       {evidenceUrl && (
-        <div className="mt-4">
+        <div className="mt-8 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
           {isImage && (
-            <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden">
+            <div className="relative w-full h-80 bg-black/40">
               <Image
                 src={evidenceUrl}
-                alt="Evidence"
+                alt="Secured Evidence Payload"
                 fill
-                className="object-contain"
+                className="object-contain p-2"
                 onError={(e) => {
-                  // Handle image load error
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
               />
@@ -58,50 +59,51 @@ export default function EvidenceDisplay({ evidence }: EvidenceDisplayProps) {
             <video
               src={evidenceUrl}
               controls
-              className="w-full rounded-lg"
+              className="w-full bg-black/40"
             >
               Your browser does not support the video tag.
             </video>
           )}
 
           {!isImage && !isVideo && (
-            <a
-              href={evidenceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              View Evidence
-              <svg
-                className="ml-2 w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div className="p-10 text-center bg-white/5">
+              <a
+                href={evidenceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 px-8 py-3 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-gray-200 transition-all active:scale-95"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                />
-              </svg>
-            </a>
+                Download Payload
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={3}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
+                </svg>
+              </a>
+              <p className="mt-4 text-[10px] text-gray-500 font-bold uppercase tracking-widest">Secure External Access Provided</p>
+            </div>
           )}
         </div>
       )}
 
-      <div className="mt-3 text-xs text-gray-500">
-        Evidence ID: {evidence.evidenceId.toString()}
+      <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+        <div className="text-[10px] font-mono text-gray-600">
+          ID: {evidence.evidenceId}
+        </div>
         {evidence.evidenceHash && (
-          <span className="ml-2 font-mono">
-            Hash: {evidence.evidenceHash.slice(0, 16)}...
-          </span>
+          <div className="text-[10px] font-mono text-indigo-500/50 truncate max-w-[200px]">
+            HASH: {evidence.evidenceHash}
+          </div>
         )}
       </div>
     </div>
   );
 }
-
-
-
-

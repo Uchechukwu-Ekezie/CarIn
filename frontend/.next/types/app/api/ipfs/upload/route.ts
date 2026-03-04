@@ -1,4 +1,4 @@
-// File: C:\Users\MSI\Desktop\walletconnect\CarIn\frontend\app\api\ipfs\upload\route.ts
+// File: /Users/ucheekezie/Documents/web3work/talentprotocol/CarIn/frontend/app/api/ipfs/upload/route.ts
 import * as entry from '../../../../../../app/api/ipfs/upload/route.js'
 import type { NextRequest } from 'next/server.js'
 

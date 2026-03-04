@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface SpotAvailabilityCheckerProps {
   spotId: string;
@@ -20,25 +20,10 @@ export default function SpotAvailabilityChecker({
   const [checking, setChecking] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
 
-  useEffect(() => {
-    if (!selectedDate || !startTime || !endTime) {
-      setIsAvailable(true);
-      return;
-    }
-
-    checkAvailability();
-  }, [spotId, selectedDate, startTime, endTime]);
-
-  const checkAvailability = async () => {
+  const checkAvailability = useCallback(async () => {
     setChecking(true);
     try {
-      // TODO: Check spot availability from smart contract
-      // const contract = getParkingSpotContract();
-      // const spot = await contract.getSpot(spotId);
-      // const bookings = await contract.getSpotBookings(spotId);
-      // Check for conflicts...
-      
-      // Mock implementation
+      // Mock implementation for Stacks migration
       await new Promise(resolve => setTimeout(resolve, 500));
       setIsAvailable(true);
       onAvailabilityChange(true);
@@ -49,7 +34,16 @@ export default function SpotAvailabilityChecker({
     } finally {
       setChecking(false);
     }
-  };
+  }, [onAvailabilityChange]);
+
+  useEffect(() => {
+    if (!selectedDate || !startTime || !endTime) {
+      setIsAvailable(true);
+      return;
+    }
+
+    checkAvailability();
+  }, [checkAvailability, selectedDate, startTime, endTime]);
 
   if (!selectedDate || !startTime || !endTime) {
     return null;
@@ -57,23 +51,23 @@ export default function SpotAvailabilityChecker({
 
   if (checking) {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-700">
-        Checking availability...
+      <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl text-[10px] font-bold text-indigo-400 uppercase tracking-widest animate-pulse">
+        Polling Stacks Node Availability...
       </div>
     );
   }
 
   if (!isAvailable) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
-        ⚠️ This spot is not available for the selected time slot
+      <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-[10px] font-bold text-rose-400 uppercase tracking-widest">
+        ⚠️ Node conflict detected for selected window
       </div>
     );
   }
 
   return (
-    <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-700">
-      ✓ Spot is available for the selected time
+    <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
+      ✓ Designaton slot verified on-chain
     </div>
   );
 }

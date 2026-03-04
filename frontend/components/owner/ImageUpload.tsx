@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 interface ImageUploadProps {
   onImageUploaded: (ipfsHash: string) => void;
@@ -33,10 +34,10 @@ export default function ImageUpload({ onImageUploaded }: ImageUploadProps) {
       // TODO: Integrate with IPFS service (Pinata, NFT.Storage, etc.)
       // For now, simulate IPFS upload
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       const mockIpfsHash = `Qm${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
       onImageUploaded(mockIpfsHash);
-      
+
       // Reset preview after upload
       setPreview(null);
       e.target.value = "";
@@ -76,10 +77,15 @@ export default function ImageUpload({ onImageUploaded }: ImageUploadProps) {
           />
         </label>
       </div>
-      
+
       {preview && (
-        <div className="mt-4">
-          <img src={preview} alt="Preview" className="max-w-xs rounded-lg" />
+        <div className="mt-8 relative w-full aspect-video rounded-3xl overflow-hidden ring-1 ring-white/10 glass-card">
+          <Image
+            src={preview}
+            alt="Preview"
+            fill
+            className="object-cover"
+          />
         </div>
       )}
     </div>

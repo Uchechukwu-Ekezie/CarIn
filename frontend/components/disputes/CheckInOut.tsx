@@ -1,24 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useStacksAuth } from '@/lib/providers/AppKitProvider';
 import { useDisputeResolution, useCheckInData } from '@/lib/hooks/useDisputeResolution';
-import { useWaitForTransactionReceipt } from 'wagmi';
 
 interface CheckInOutProps {
-  bookingId: bigint;
+  bookingId: string;
   isOwner?: boolean;
 }
 
 export default function CheckInOut({ bookingId, isOwner = false }: CheckInOutProps) {
-  const { address } = useAccount();
-  const { recordCheckIn, recordCheckOut, hash } = useDisputeResolution();
+  const { stxAddress: address } = useStacksAuth();
+  const { recordCheckIn, recordCheckOut, isPending } = useDisputeResolution();
   const { checkInData, isLoading } = useCheckInData(bookingId);
   const [action, setAction] = useState<'checkin' | 'checkout' | null>(null);
-
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash,
-  });
 
   const handleCheckIn = async () => {
     if (!address) return;
@@ -44,74 +39,65 @@ export default function CheckInOut({ bookingId, isOwner = false }: CheckInOutPro
 
   if (isLoading) {
     return (
-      <div className="p-4 bg-gray-50 rounded-lg">
-        <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
+      <div className="p-6 glass-card rounded-2xl border border-white/10">
+        <div className="animate-pulse space-y-3">
+          <div className="h-4 bg-white/5 rounded w-1/2"></div>
+          <div className="h-10 bg-white/5 rounded"></div>
         </div>
-      </div>
-    );
-  }
-
-  if (isSuccess && action) {
-    return (
-      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-        <p className="text-green-800 font-medium">
-          {action === 'checkin' ? 'Check-in' : 'Check-out'} recorded successfully!
-        </p>
       </div>
     );
   }
 
   return (
-    <div className="p-4 bg-white border border-gray-200 rounded-lg">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">
-        {isOwner ? 'Record Check-in/Check-out' : 'Check-in/Check-out Status'}
+    <div className="p-6 glass-card border border-white/10 rounded-3xl group">
+      <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-indigo-500 shadow-lg shadow-indigo-500/50"></span>
+        {isOwner ? 'Recording Terminal' : 'Booking Status'}
       </h3>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl group-hover:bg-white/[0.08] transition-colors">
           <div>
-            <p className="font-medium text-gray-700">Check-in Status</p>
+            <p className="text-xs font-semibold text-indigo-400 uppercase tracking-widest mb-1">Check-in</p>
             {checkInData?.checkedIn ? (
-              <p className="text-sm text-gray-600">
-                Checked in at {new Date(Number(checkInData.checkInTime) * 1000).toLocaleString()}
+              <p className="text-sm text-white">
+                Recorded {new Date(checkInData.checkInTime).toLocaleString()}
               </p>
             ) : (
-              <p className="text-sm text-gray-500">Not checked in</p>
+              <p className="text-sm text-gray-500">Awaiting check-in</p>
             )}
           </div>
           {isOwner && !checkInData?.checkedIn && (
             <button
               onClick={handleCheckIn}
-              disabled={action === 'checkin' || isConfirming}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={action === 'checkin' || isPending}
+              className="px-6 py-2 bg-indigo-600 text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-indigo-500 transition-all shadow-lg active:scale-95 disabled:opacity-50"
             >
-              {action === 'checkin' || isConfirming ? 'Recording...' : 'Record Check-in'}
+              {action === 'checkin' || isPending ? 'RECORDING...' : 'RECORD'}
             </button>
           )}
         </div>
 
-        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl group-hover:bg-white/[0.08] transition-colors">
           <div>
-            <p className="font-medium text-gray-700">Check-out Status</p>
+            <p className="text-xs font-semibold text-emerald-400 uppercase tracking-widest mb-1">Check-out</p>
             {checkInData?.checkedOut ? (
-              <p className="text-sm text-gray-600">
-                Checked out at {new Date(Number(checkInData.checkOutTime) * 1000).toLocaleString()}
+              <p className="text-sm text-white">
+                Recorded {new Date(checkInData.checkOutTime).toLocaleString()}
               </p>
             ) : (
               <p className="text-sm text-gray-500">
-                {checkInData?.checkedIn ? 'Not checked out' : 'Check-in required first'}
+                {checkInData?.checkedIn ? 'Awaiting check-out' : 'Check-in required'}
               </p>
             )}
           </div>
           {isOwner && checkInData?.checkedIn && !checkInData?.checkedOut && (
             <button
               onClick={handleCheckOut}
-              disabled={action === 'checkout' || isConfirming}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={action === 'checkout' || isPending}
+              className="px-6 py-2 bg-emerald-600 text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-emerald-500 transition-all shadow-lg active:scale-95 disabled:opacity-50"
             >
-              {action === 'checkout' || isConfirming ? 'Recording...' : 'Record Check-out'}
+              {action === 'checkout' || isPending ? 'RECORDING...' : 'RECORD'}
             </button>
           )}
         </div>
@@ -119,7 +105,3 @@ export default function CheckInOut({ bookingId, isOwner = false }: CheckInOutPro
     </div>
   );
 }
-
-
-
-

@@ -1,32 +1,29 @@
 /**
- * Contract configuration and utilities
+ * Stacks network configuration and constants
  */
 
 export const NETWORKS = {
-  alfajores: {
-    name: "Alfajores Testnet",
-    chainId: 44787,
-    rpcUrl: "https://alfajores-forno.celo-testnet.org",
+  testnet: {
+    name: "Stacks Testnet",
+    chainId: "testnet",
   },
-  celo: {
-    name: "Celo Mainnet",
-    chainId: 42220,
-    rpcUrl: "https://forno.celo.org",
+  mainnet: {
+    name: "Stacks Mainnet",
+    chainId: "mainnet",
   },
 } as const;
 
 export type NetworkName = keyof typeof NETWORKS;
 
-export function getNetworkConfig(network: NetworkName = "alfajores") {
+export function getNetworkConfig(network: NetworkName = "testnet") {
   return NETWORKS[network];
 }
 
-export function isNetworkSupported(chainId: number): boolean {
+export function isNetworkSupported(chainId: string): boolean {
   return Object.values(NETWORKS).some(network => network.chainId === chainId);
 }
 
 export const DISPUTE_RESOLUTION_ADDRESSES = {
-  alfajores: process.env.NEXT_PUBLIC_DISPUTE_RESOLUTION_ADDRESS_ALFAJORES || "",
-  celo: process.env.NEXT_PUBLIC_DISPUTE_RESOLUTION_ADDRESS_CELO || "",
+  testnet: process.env.NEXT_PUBLIC_DISPUTE_RESOLUTION_ADDRESS_TESTNET || "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dispute-resolution",
+  mainnet: process.env.NEXT_PUBLIC_DISPUTE_RESOLUTION_ADDRESS_MAINNET || "",
 };
-

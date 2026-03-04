@@ -1,30 +1,37 @@
-import { ethers } from "ethers";
+/**
+ * ParkingSpot contract constants and utilities for Stacks
+ */
 
-// ParkingSpot contract ABI (simplified - full ABI should come from compiled contract)
-export const PARKING_SPOT_ABI = [
-  "function listSpot(string memory location, uint256 pricePerHour) external returns (uint256)",
-  "function getSpot(uint256 spotId) external view returns (tuple(uint256 id, address owner, string location, uint256 pricePerHour, bool isAvailable, uint256 createdAt))",
-  "function updateSpotAvailability(uint256 spotId, bool isAvailable) external",
-  "function getOwnerSpots(address owner) external view returns (uint256[] memory)",
-];
-
-// Contract addresses (will be set after deployment)
+// Contract addresses for Stacks
 export const PARKING_SPOT_ADDRESSES = {
-  alfajores: process.env.NEXT_PUBLIC_PARKING_SPOT_ADDRESS_ALFAJORES || "",
-  celo: process.env.NEXT_PUBLIC_PARKING_SPOT_ADDRESS_CELO || "",
+  testnet: process.env.NEXT_PUBLIC_PARKING_SPOT_ADDRESS_TESTNET || "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.parking-spot",
+  mainnet: process.env.NEXT_PUBLIC_PARKING_SPOT_ADDRESS_MAINNET || "",
 };
 
-export function getParkingSpotContract(
-  provider: ethers.Provider | ethers.Signer,
-  network: "alfajores" | "celo" = "alfajores"
-) {
-  const address = PARKING_SPOT_ADDRESSES[network];
-  if (!address) {
-    throw new Error(`ParkingSpot contract address not set for ${network}`);
-  }
-  return new ethers.Contract(address, PARKING_SPOT_ABI, provider);
+export interface ParkingSpot {
+  id: string;
+  owner: string;
+  location: string;
+  pricePerHour: string;
+  isAvailable: boolean;
+  createdAt: number;
 }
 
-
-
-
+/**
+ * Mock function to get spot details from Stacks
+ */
+export async function getSpotDetails(
+  spotId: string,
+  network: "testnet" | "mainnet" = "testnet"
+): Promise<ParkingSpot> {
+  console.log(`Fetching Stacks spot ${spotId} on ${network}...`);
+  // Mock implementation
+  return {
+    id: spotId,
+    owner: "ST1PQ...",
+    location: "San Francisco, CA",
+    pricePerHour: "5000000", // 5 STX in uSTX
+    isAvailable: true,
+    createdAt: Math.floor(Date.now() / 1000) - 86400,
+  };
+}

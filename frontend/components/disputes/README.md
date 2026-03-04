@@ -105,8 +105,8 @@ function DisputesPage() {
 
 ## Dependencies
 
-- `wagmi` - Wallet connection and contract interactions
-- `viem` - Ethereum utilities
+- `@stacks/connect` - Wallet connection and contract interactions
+- `@stacks/transactions` - Stacks utilities
 - `date-fns` - Date formatting
 - `next/image` - Image optimization
 

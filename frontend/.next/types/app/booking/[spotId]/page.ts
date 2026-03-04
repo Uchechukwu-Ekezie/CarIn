@@ -1,4 +1,4 @@
-// File: C:\Users\MSI\Desktop\walletconnect\CarIn\frontend\app\booking\[spotId]\page.tsx
+// File: /Users/ucheekezie/Documents/web3work/talentprotocol/CarIn/frontend/app/booking/[spotId]/page.tsx
 import * as entry from '../../../../../app/booking/[spotId]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

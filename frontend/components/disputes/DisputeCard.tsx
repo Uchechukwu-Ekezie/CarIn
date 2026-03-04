@@ -1,7 +1,6 @@
 'use client';
 
-import { DisputeDetails, ResolutionType } from '@/lib/contracts/disputeResolution';
-import { formatEvidenceType } from '@/lib/utils/evidenceHandler';
+import { DisputeDetails } from '@/lib/contracts/disputeResolution';
 import { formatDistanceToNow } from 'date-fns';
 import DisputeStatusBadge from './DisputeStatusBadge';
 
@@ -15,16 +14,18 @@ export default function DisputeCard({ dispute, onClick }: DisputeCardProps) {
   return (
     <div
       onClick={onClick}
-      className={`p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer ${
-        onClick ? 'cursor-pointer' : ''
-      }`}
+      className="p-8 glass-card border border-white/10 rounded-[2rem] hover:bg-white/[0.05] transition-all group relative overflow-hidden cursor-pointer"
     >
-      <div className="flex justify-between items-start mb-4">
+      <div className="flex justify-between items-start mb-6 relative z-10">
         <div>
-          <h3 className="text-lg font-semibold text-gray-800">Dispute #{dispute.disputeId.toString()}</h3>
-          <p className="text-sm text-gray-600 mt-1">
-            Booking #{dispute.bookingId.toString()} • Escrow #{dispute.escrowId.toString()}
-          </p>
+          <h3 className="text-xl font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors">
+            Dispute #{dispute.disputeId}
+          </h3>
+          <div className="flex items-center gap-3 text-xs font-medium text-gray-500 uppercase tracking-widest">
+            <span>Booking #{dispute.bookingId}</span>
+            <span className="w-1 h-1 rounded-full bg-white/20"></span>
+            <span>Escrow #{dispute.escrowId}</span>
+          </div>
         </div>
         <DisputeStatusBadge
           isResolved={dispute.isResolved}
@@ -34,29 +35,37 @@ export default function DisputeCard({ dispute, onClick }: DisputeCardProps) {
         />
       </div>
 
-      <div className="mb-4">
-        <p className="text-gray-700 line-clamp-2">{dispute.reason}</p>
+      <div className="mb-8 relative z-10">
+        <p className="text-gray-400 leading-relaxed line-clamp-2">{dispute.reason}</p>
       </div>
 
-      <div className="flex justify-between items-center text-sm text-gray-600">
-        <div>
-          <p>
-            Filed by: <span className="font-medium">{dispute.filedBy.slice(0, 6)}...{dispute.filedBy.slice(-4)}</span>
+      <div className="flex justify-between items-end text-sm relative z-10">
+        <div className="space-y-1">
+          <p className="text-gray-500">
+            Filed by <span className="text-white font-medium">{dispute.filedBy.slice(0, 6)}...{dispute.filedBy.slice(-4)}</span>
           </p>
-          <p className="mt-1">
-            Filed {formatDistanceToNow(new Date(Number(dispute.filedAt) * 1000), { addSuffix: true })}
+          <p className="text-xs text-indigo-400/70 font-medium">
+            {formatDistanceToNow(new Date(dispute.filedAt), { addSuffix: true })}
           </p>
         </div>
-        {dispute.isResolved && dispute.resolvedAt > 0n && (
+
+        {dispute.isResolved && dispute.resolvedAt > 0 && (
           <div className="text-right">
-            <p className="font-medium">Resolved</p>
-            <p className="text-xs mt-1">
-              {formatDistanceToNow(new Date(Number(dispute.resolvedAt) * 1000), { addSuffix: true })}
+            <div className="flex items-center gap-2 justify-end text-emerald-400 font-bold mb-1">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>RESOLVED</span>
+            </div>
+            <p className="text-[10px] text-gray-600 uppercase tracking-widest">
+              {formatDistanceToNow(new Date(dispute.resolvedAt), { addSuffix: true })}
             </p>
           </div>
         )}
       </div>
+
+      {/* Subtle interaction background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 via-transparent to-purple-500/0 group-hover:from-indigo-500/5 group-hover:to-purple-500/5 transition-all duration-500"></div>
     </div>
   );
 }
-

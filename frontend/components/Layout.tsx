@@ -1,11 +1,16 @@
+import { ReactNode } from 'react';
 import Header from './Header';
 import Footer from './Footer';
 
-const Layout = ({ children }) => {
+interface LayoutProps {
+  children: ReactNode;
+}
+
+const Layout = ({ children }: LayoutProps) => {
   return (
     <>
       <Header />
-      <main>{children}</main>
+      <main className="bg-black min-h-screen">{children}</main>
       <Footer />
     </>
   );

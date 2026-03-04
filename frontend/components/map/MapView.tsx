@@ -22,10 +22,10 @@ import { ParkingSpot } from '@/lib/hooks/useParkingSpots';
 const DynamicMapContainer = dynamic(() => import('./MapContainer'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+    <div className="w-full h-full flex items-center justify-center bg-black/20 backdrop-blur-md">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading map...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+        <p className="text-gray-400 font-medium lowercase tracking-widest text-xs">Initializing Grid...</p>
       </div>
     </div>
   ),
@@ -97,10 +97,10 @@ export default function MapView({ onSpotClick }: MapViewProps) {
 
   if (loading && spots.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+      <div className="w-full h-full flex items-center justify-center bg-black/10">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading parking spots...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+          <p className="text-gray-400 font-medium">Syncing Bitcoin L2...</p>
         </div>
       </div>
     );
@@ -108,14 +108,14 @@ export default function MapView({ onSpotClick }: MapViewProps) {
 
   if (error) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-100">
-        <div className="text-center p-6 bg-white rounded-lg shadow">
-          <p className="text-red-600 mb-4">Error loading spots: {error}</p>
+      <div className="w-full h-full flex items-center justify-center bg-black/10">
+        <div className="text-center p-8 glass-card border-red-500/20">
+          <p className="text-red-400 mb-6 font-medium">Node Error: {error}</p>
           <button
             onClick={refresh}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="btn-primary"
           >
-            Retry
+            Reconnect
           </button>
         </div>
       </div>
@@ -151,10 +151,10 @@ export default function MapView({ onSpotClick }: MapViewProps) {
       </div>
 
       {/* Results Count */}
-      <div className="absolute bottom-4 left-4 z-[1000] bg-white px-4 py-2 rounded-lg shadow-lg">
-        <p className="text-sm text-gray-600">
-          Showing <span className="font-semibold">{filteredSpots.length}</span>{' '}
-          of <span className="font-semibold">{spots.length}</span> spots
+      <div className="absolute bottom-10 left-10 z-[1000] glass-card px-6 py-3 border-white/10">
+        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest flex items-center gap-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          On-Chain: <span className="text-white">{filteredSpots.length} / {spots.length}</span>
         </p>
       </div>
     </div>

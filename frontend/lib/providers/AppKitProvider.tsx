@@ -1,58 +1,93 @@
 "use client";
 
-import { AppKitProvider as ReownAppKitProvider } from "@reown/appkit/react";
-import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { celo, celoAlfajores } from "viem/chains";
-import { WagmiProvider } from "wagmi";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { connect, disconnect, isConnected, getLocalStorage } from "@stacks/connect";
 
-// Get project ID from environment variable
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "";
+interface StacksAuthContextType {
+  isConnected: boolean;
+  stxAddress: string | null;
+  connectWallet: () => Promise<void>;
+  logout: () => void;
+}
 
-// Create Wagmi adapter with Celo networks
-const wagmiAdapter = new WagmiAdapter({
-  networks: [celoAlfajores, celo],
-  projectId,
-});
-
-// Create metadata object
-const metadata = {
-  name: "CarIn",
-  description: "Decentralized parking spot booking on Celo",
-  url: typeof window !== "undefined" ? window.location.origin : "https://carin.app",
-  icons: [
-    typeof window !== "undefined"
-      ? `${window.location.origin}/icon.png`
-      : "https://carin.app/icon.png",
-  ],
-};
-
-// AppKit configuration options
-const appKitOptions = {
-  adapters: [wagmiAdapter],
-  networks: [celoAlfajores, celo],
-  projectId,
-  metadata,
-  features: {
-    analytics: true,
-    email: false,
-    socials: [],
-  },
-  themeMode: "light" as const,
-  defaultNetwork: celoAlfajores,
-};
-
-// Create React Query client
-const queryClient = new QueryClient();
+const StacksAuthContext = createContext<StacksAuthContextType | undefined>(undefined);
 
 export function AppKitProvider({ children }: { children: ReactNode }) {
+  const [connected, setConnected] = useState(false);
+  const [address, setAddress] = useState<string | null>(null);
+
+  const checkAuth = () => {
+    try {
+      if (isConnected()) {
+        const userData = getLocalStorage();
+        const stxEntry = (userData as any)?.addresses?.find((a: any) => a.symbol === 'STX' || a.type === 'p2wpkh' || a.type === 'p2tr');
+        if (stxEntry) {
+          setConnected(true);
+          setAddress(stxEntry.address);
+        } else {
+          setConnected(false);
+          setAddress(null);
+        }
+      } else {
+        setConnected(false);
+        setAddress(null);
+      }
+    } catch (e) {
+      console.error("Auth check failed:", e);
+      setConnected(false);
+      setAddress(null);
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+
+    // Sync across tabs/windows
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key?.includes("stacks-auth") || e.key?.includes("blockstack-session")) {
+        checkAuth();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  const connectWallet = async () => {
+    try {
+      const response = await connect();
+      const stxEntry = (response as any)?.addresses?.find((a: any) => a.symbol === 'STX' || a.type === 'p2wpkh' || a.type === 'p2tr');
+      if (stxEntry) {
+        setConnected(true);
+        setAddress(stxEntry.address);
+      } else {
+        // Fallback to check storage if response structure varies
+        checkAuth();
+      }
+    } catch (error) {
+      console.error("Connection failed:", error);
+    }
+  };
+
+  const logout = () => {
+    disconnect();
+    setConnected(false);
+    setAddress(null);
+  };
+
   return (
-    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <ReownAppKitProvider {...appKitOptions}>{children}</ReownAppKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <StacksAuthContext.Provider
+      value={{ isConnected: connected, stxAddress: address, connectWallet, logout }}
+    >
+      {children}
+    </StacksAuthContext.Provider>
   );
 }
 
+export const useStacksAuth = () => {
+  const context = useContext(StacksAuthContext);
+  if (context === undefined) {
+    throw new Error("useStacksAuth must be used within a StacksAuthProvider");
+  }
+  return context;
+};

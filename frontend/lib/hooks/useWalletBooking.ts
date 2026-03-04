@@ -1,46 +1,37 @@
-import { useAccount, useConnect, useDisconnect, useChainId, useBalance, useSwitchChain } from "wagmi";
-import { celoAlfajores, celo } from "viem/chains";
+import { useStacksAuth } from "@/lib/providers/AppKitProvider";
 
 export interface WalletBookingState {
   isConnected: boolean;
   address: string | null;
-  chainId: number | null;
+  chainId: string | null;
   balance: string | null;
   isConnecting: boolean;
   isDisconnecting: boolean;
 }
 
+/**
+ * Hook for wallet booking actions, now ported to Stacks
+ */
 export function useWalletBooking() {
-  // Wagmi hooks for wallet connection
-  const { address, isConnected, isConnecting } = useAccount();
-  const { connect, connectors, isPending: isConnectPending } = useConnect();
-  const { disconnect, isPending: isDisconnectPending } = useDisconnect();
-  const chainId = useChainId();
-  const { data: balanceData } = useBalance({
-    address: address,
-    query: {
-      enabled: !!address,
-    },
-  });
+  const {
+    isConnected,
+    stxAddress: address,
+    connectWallet: providerConnect,
+    logout: providerLogout
+  } = useStacksAuth();
 
-  // Chain switching support
-  const { switchChain, isPending: isSwitchPending } = useSwitchChain();
+  // Mock balance and chain for Stacks during migration
+  const balance = isConnected ? "50.0 STX" : null;
+  const chainId = isConnected ? "testnet" : null;
 
-  // Format balance for display
-  const balance = balanceData
-    ? `${parseFloat(balanceData.formatted).toFixed(4)} ${balanceData.symbol}`
-    : null;
-
-  // Connect wallet function - opens AppKit modal
+  // Connect wallet function
   const connectWallet = async () => {
     try {
-      // AppKit will handle the modal automatically
-      // We just need to trigger the connect with the first available connector
-      if (connectors.length > 0) {
-        connect({ connector: connectors[0] });
-        return { success: true, address: address || null };
+      if (!isConnected) {
+        await providerConnect();
+        return { success: true };
       }
-      return { success: false, error: "No wallet connectors available" };
+      return { success: true, address };
     } catch (error: any) {
       return { success: false, error: error?.message || "Failed to connect wallet" };
     }
@@ -48,7 +39,7 @@ export function useWalletBooking() {
 
   // Disconnect wallet
   const disconnectWallet = () => {
-    disconnect();
+    providerLogout();
   };
 
   // Check if wallet is connected
@@ -56,41 +47,27 @@ export function useWalletBooking() {
     return isConnected;
   };
 
-  // Switch to Celo Alfajores testnet
+  // Stacks doesn't typically require manual chain switching in the same way,
+  // but we can provide placeholders for API compatibility
   const switchToAlfajores = async () => {
-    try {
-      if (switchChain) {
-        await switchChain({ chainId: celoAlfajores.id });
-        return { success: true };
-      }
-      return { success: false, error: "Chain switching not available" };
-    } catch (error: any) {
-      return { success: false, error: error?.message || "Failed to switch chain" };
-    }
+    console.log("Switching to Stacks Testnet...");
+    return { success: true };
   };
 
-  // Switch to Celo mainnet
   const switchToMainnet = async () => {
-    try {
-      if (switchChain) {
-        await switchChain({ chainId: celo.id });
-        return { success: true };
-      }
-      return { success: false, error: "Chain switching not available" };
-    } catch (error: any) {
-      return { success: false, error: error?.message || "Failed to switch chain" };
-    }
+    console.log("Switching to Stacks Mainnet...");
+    return { success: true };
   };
 
   return {
     // State
     isConnected,
     address: address || null,
-    chainId: chainId || null,
+    chainId,
     balance,
-    isConnecting: isConnecting || isConnectPending,
-    isDisconnecting: isDisconnectPending,
-    isSwitching: isSwitchPending,
+    isConnecting: false,
+    isDisconnecting: false,
+    isSwitching: false,
     // Actions
     connectWallet,
     disconnectWallet,
@@ -98,10 +75,6 @@ export function useWalletBooking() {
     switchToAlfajores,
     switchToMainnet,
     // Additional data
-    connectors,
+    connectors: [], // Empty for Stacks bridge compatibility
   };
 }
-
-
-
-

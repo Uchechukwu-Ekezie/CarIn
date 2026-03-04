@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 
 interface Spot {
-  id: number;
+  id: string;
   location: string;
   pricePerHour: string;
   isAvailable: boolean;
@@ -19,16 +19,12 @@ export function useParkingSpot() {
   ) => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      // TODO: Integrate with ParkingSpot smart contract
-      // const contract = getParkingSpotContract();
-      // const tx = await contract.listSpot(location, ethers.parseEther(pricePerHour));
-      // await tx.wait();
-      
-      // Mock implementation
+      // Mock implementation for Stacks migration
+      console.log("Listing Stacks spot...", { location, pricePerHour, ipfsHash });
       await new Promise(resolve => setTimeout(resolve, 2000));
-      return { success: true, spotId: Math.floor(Math.random() * 1000) };
+      return { success: true, spotId: "STX-SPOT-" + Math.floor(Math.random() * 1000000) };
     } catch (err: any) {
       setError(err.message || "Failed to list spot");
       return { success: false, error: err.message };
@@ -38,23 +34,15 @@ export function useParkingSpot() {
   }, []);
 
   const updateSpot = useCallback(async (
-    spotId: number,
+    spotId: string,
     pricePerHour?: string,
     isAvailable?: boolean
   ) => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      // TODO: Integrate with ParkingSpot smart contract
-      // const contract = getParkingSpotContract();
-      // if (pricePerHour !== undefined) {
-      //   await contract.updateSpotPrice(spotId, ethers.parseEther(pricePerHour));
-      // }
-      // if (isAvailable !== undefined) {
-      //   await contract.updateSpotAvailability(spotId, isAvailable);
-      // }
-      
+      console.log("Updating Stacks spot...", { spotId, pricePerHour, isAvailable });
       await new Promise(resolve => setTimeout(resolve, 1000));
       return { success: true };
     } catch (err: any) {
@@ -65,15 +53,12 @@ export function useParkingSpot() {
     }
   }, []);
 
-  const deactivateSpot = useCallback(async (spotId: number) => {
+  const deactivateSpot = useCallback(async (spotId: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      // TODO: Integrate with ParkingSpot smart contract
-      // const contract = getParkingSpotContract();
-      // await contract.updateSpotAvailability(spotId, false);
-      
+      console.log("Deactivating Stacks spot...", spotId);
       await new Promise(resolve => setTimeout(resolve, 1000));
       return { success: true };
     } catch (err: any) {
@@ -87,14 +72,9 @@ export function useParkingSpot() {
   const getOwnerSpots = useCallback(async (ownerAddress: string): Promise<Spot[]> => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      // TODO: Fetch from ParkingSpot smart contract
-      // const contract = getParkingSpotContract();
-      // const spotIds = await contract.getOwnerSpots(ownerAddress);
-      // const spots = await Promise.all(spotIds.map(id => contract.getSpot(id)));
-      
-      // Mock implementation
+      console.log("Fetching Stacks spots for owner:", ownerAddress);
       await new Promise(resolve => setTimeout(resolve, 500));
       return [];
     } catch (err: any) {
@@ -114,7 +94,3 @@ export function useParkingSpot() {
     error,
   };
 }
-
-
-
-

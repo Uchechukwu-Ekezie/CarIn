@@ -38,14 +38,14 @@ export default function MapFilters({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4">
+    <div className="glass-card p-4 border-white/10 group">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between text-left"
       >
-        <span className="font-semibold">Filters</span>
+        <span className="font-bold text-white uppercase tracking-widest text-xs">Filter Settings</span>
         <svg
-          className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''} text-gray-500`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -60,13 +60,13 @@ export default function MapFilters({
       </button>
 
       {isOpen && (
-        <div className="mt-4 space-y-4">
+        <div className="mt-6 space-y-6 pt-6 border-t border-white/5 animate-fade-in-up">
           {/* Price Range */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Price Range (cUSD/hr)
+            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">
+              Price Range (STX/hr)
             </label>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <input
                 type="number"
                 min="0"
@@ -75,10 +75,10 @@ export default function MapFilters({
                 onChange={(e) =>
                   updateFilter('minPrice', parseFloat(e.target.value) || 0)
                 }
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
                 placeholder="Min"
               />
-              <span className="text-gray-500">-</span>
+              <span className="text-gray-600">—</span>
               <input
                 type="number"
                 min="0"
@@ -87,7 +87,7 @@ export default function MapFilters({
                 onChange={(e) =>
                   updateFilter('maxPrice', parseFloat(e.target.value) || 10)
                 }
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
                 placeholder="Max"
               />
             </div>
@@ -95,24 +95,24 @@ export default function MapFilters({
 
           {/* Availability */}
           <div>
-            <label className="flex items-center gap-2">
+            <label className="flex items-center gap-3 cursor-pointer group/label">
               <input
                 type="checkbox"
                 checked={filters.showAvailableOnly}
                 onChange={(e) =>
                   updateFilter('showAvailableOnly', e.target.checked)
                 }
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="w-5 h-5 bg-white/5 border border-white/10 rounded-lg text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0 transition-all cursor-pointer"
               />
-              <span className="text-sm font-medium text-gray-700">
-                Show available spots only
+              <span className="text-xs font-bold text-gray-400 group-hover/label:text-white transition-colors uppercase tracking-wider">
+                Available Only
               </span>
             </label>
           </div>
 
           {/* Distance */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">
               Max Distance: {filters.maxDistance} km
             </label>
             <input
@@ -123,7 +123,7 @@ export default function MapFilters({
               onChange={(e) =>
                 updateFilter('maxDistance', parseInt(e.target.value))
               }
-              className="w-full"
+              className="w-full accent-indigo-500"
             />
           </div>
         </div>
@@ -131,7 +131,3 @@ export default function MapFilters({
     </div>
   );
 }
-
-
-
-

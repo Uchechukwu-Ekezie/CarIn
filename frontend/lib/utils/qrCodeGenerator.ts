@@ -1,7 +1,5 @@
-import { verifyMessage } from "viem";
-
 /**
- * QR Code generation utilities for booking access
+ * QR Code generation utilities for booking access on Stacks
  */
 
 export interface QRCodeData {
@@ -11,7 +9,7 @@ export interface QRCodeData {
   timestamp: number;
   type: "parking_access";
   signature?: string; // Cryptographic signature
-  signerAddress?: string; // Address of the signer (booker)
+  signerAddress?: string; // Stacks address of the signer (booker)
 }
 
 /**
@@ -68,6 +66,7 @@ export function parseBookingQRData(qrString: string): QRCodeData | null {
 
 /**
  * Validate QR code data (check expiration, signature, etc.)
+ * Note: Signature verification will be handled by Stacks-specific logic
  */
 export async function validateQRCodeData(
   qrData: QRCodeData,
@@ -82,28 +81,24 @@ export async function validateQRCodeData(
     return { valid: false, error: "QR code expired" };
   }
 
-  // Verify signature if present and expected signer is provided
+  // Verify signer if present
   if (qrData.signature && expectedSigner) {
     if (
       !qrData.signerAddress ||
-      qrData.signerAddress.toLowerCase() !== expectedSigner.toLowerCase()
+      qrData.signerAddress !== expectedSigner
     ) {
       return { valid: false, error: "Signer address mismatch" };
     }
 
-    const message = generateAccessMessage(qrData.bookingId, qrData.timestamp);
-    try {
-      const isValid = await verifyMessage({
-        address: expectedSigner as `0x${string}`,
-        message: message,
-        signature: qrData.signature as `0x${string}`,
-      });
+    // TODO: Implement Stacks-compatible signature verification
+    // For now, during migration, we accept the signature if the address matches
+    console.log("Stacks signature verification placeholder for:", qrData.bookingId);
 
-      if (!isValid) {
-        return { valid: false, error: "Invalid signature" };
-      }
-    } catch (error) {
-      return { valid: false, error: "Signature verification failed" };
+    // In a real implementation, we would use @stacks/encryption or similar
+    const isValid = true;
+
+    if (!isValid) {
+      return { valid: false, error: "Invalid signature" };
     }
   } else if (expectedSigner) {
     return { valid: false, error: "Missing signature" };

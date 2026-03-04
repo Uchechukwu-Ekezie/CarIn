@@ -1,29 +1,40 @@
-import { ethers } from "ethers";
+/**
+ * PaymentEscrow contract constants and utilities for Stacks
+ */
 
-// PaymentEscrow contract ABI (simplified)
-export const PAYMENT_ESCROW_ABI = [
-  "function getPayeeEscrows(address payee) external view returns (uint256[] memory)",
-  "function getEscrow(uint256 escrowId) external view returns (tuple(uint256 escrowId, uint256 bookingId, address payer, address payee, uint256 amount, address token, uint256 releaseTime, uint8 status))",
-  "function releaseEscrow(uint256 escrowId) external",
-];
-
-// Contract addresses (will be set after deployment)
+// Contract addresses for Stacks
 export const PAYMENT_ESCROW_ADDRESSES = {
-  alfajores: process.env.NEXT_PUBLIC_PAYMENT_ESCROW_ADDRESS_ALFAJORES || "",
-  celo: process.env.NEXT_PUBLIC_PAYMENT_ESCROW_ADDRESS_CELO || "",
+  testnet: process.env.NEXT_PUBLIC_PAYMENT_ESCROW_ADDRESS_TESTNET || "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.payment-escrow",
+  mainnet: process.env.NEXT_PUBLIC_PAYMENT_ESCROW_ADDRESS_MAINNET || "",
 };
 
-export function getPaymentEscrowContract(
-  provider: ethers.Provider | ethers.Signer,
-  network: "alfajores" | "celo" = "alfajores"
-) {
-  const address = PAYMENT_ESCROW_ADDRESSES[network];
-  if (!address) {
-    throw new Error(`PaymentEscrow contract address not set for ${network}`);
-  }
-  return new ethers.Contract(address, PAYMENT_ESCROW_ABI, provider);
+export interface EscrowDetails {
+  escrowId: string;
+  bookingId: string;
+  payer: string;
+  payee: string;
+  amount: string;
+  token?: string;
+  releaseTime: number;
+  status: number;
 }
 
-
-
-
+/**
+ * Mock function to get escrow details from Stacks
+ */
+export async function getEscrowDetails(
+  escrowId: string,
+  network: "testnet" | "mainnet" = "testnet"
+): Promise<EscrowDetails> {
+  console.log(`Fetching Stacks escrow ${escrowId} on ${network}...`);
+  // Mock implementation
+  return {
+    escrowId,
+    bookingId: "BOOK-123",
+    payer: "ST1PQ...",
+    payee: "ST2ABC...",
+    amount: "1000000",
+    releaseTime: Math.floor(Date.now() / 1000) + 3600,
+    status: 1,
+  };
+}

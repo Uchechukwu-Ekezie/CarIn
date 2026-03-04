@@ -1,4 +1,4 @@
-// File: C:\Users\MSI\Desktop\walletconnect\CarIn\frontend\app\rewards\history\page.tsx
+// File: /Users/ucheekezie/Documents/web3work/talentprotocol/CarIn/frontend/app/rewards/history/page.tsx
 import * as entry from '../../../../../app/rewards/history/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

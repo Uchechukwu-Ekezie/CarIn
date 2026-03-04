@@ -48,28 +48,28 @@ export default function BookingReceipt({ booking }: BookingReceiptProps) {
           <span className="text-gray-600">Duration:</span>
           <span className="font-medium">{booking.duration} hour(s)</span>
         </div>
-        <div className="flex justify-between py-2 border-b">
-          <span className="text-gray-600">Subtotal:</span>
-          <span className="font-medium">{booking.subtotal} cUSD</span>
+        <div className="flex justify-between py-4 border-b border-white/5">
+          <span className="text-gray-400 font-medium">Subtotal:</span>
+          <span className="font-bold text-white">{booking.subtotal} STX</span>
         </div>
-        <div className="flex justify-between py-2 border-b">
-          <span className="text-gray-600">Service Fee:</span>
-          <span className="font-medium">{booking.serviceFee} cUSD</span>
+        <div className="flex justify-between py-4 border-b border-white/5">
+          <span className="text-gray-400 font-medium">Service Fee:</span>
+          <span className="font-bold text-white">{booking.serviceFee} STX</span>
         </div>
-        <div className="flex justify-between py-2 border-t-2 pt-2">
-          <span className="text-lg font-bold">Total:</span>
-          <span className="text-lg font-bold text-blue-600">{booking.total} cUSD</span>
+        <div className="flex justify-between py-6 border-t-2 border-indigo-500/20 mt-4">
+          <span className="text-xl font-bold text-white">Total:</span>
+          <span className="text-2xl font-black text-indigo-400">{booking.total} STX</span>
         </div>
         {booking.transactionHash && (
           <div className="flex justify-between py-2 border-t pt-4">
             <span className="text-gray-600">Transaction:</span>
             <a
-              href={`https://alfajores.celoscan.io/tx/${booking.transactionHash}`}
+              href={`https://explorer.hiro.so/txid/${booking.transactionHash}?chain=testnet`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline text-sm font-mono"
+              className="text-indigo-400 hover:text-indigo-300 text-sm font-bold tracking-tighter"
             >
-              {booking.transactionHash.slice(0, 10)}...
+              {booking.transactionHash.slice(0, 10)}...{booking.transactionHash.slice(-6)}
             </a>
           </div>
         )}

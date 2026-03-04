@@ -59,7 +59,7 @@ All components use the `useRewards` hooks from `@/lib/hooks/useRewards`:
 
 ## Requirements
 
-- Wallet connection (wagmi)
+- Wallet connection (Stacks Connect)
 - Contract addresses configured in environment variables
 - Network connection to Celo (Alfajores or Mainnet)
 

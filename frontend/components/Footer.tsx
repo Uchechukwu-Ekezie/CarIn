@@ -4,143 +4,71 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 text-gray-300 border-t border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand Section */}
-          <div className="col-span-1">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xl px-3 py-1 rounded-lg">
-                CarIn
+    <footer className="relative mt-20 pb-12 border-t border-white/5 bg-black/50 backdrop-blur-md">
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div className="col-span-1 md:col-span-1">
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-2xl px-4 py-1.5 rounded-xl shadow-lg shadow-indigo-500/20 inline-block mb-6">
+              CarIn
+            </div>
+            <p className="text-gray-400 text-sm leading-relaxed mb-6">
+              Revolutionizing urban mobility through decentralized parking infrastructure on Stacks.
+            </p>
+            <div className="flex gap-4">
+              <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all text-gray-400 hover:text-white">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" /></svg>
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all text-gray-400 hover:text-white">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.43.372.823 1.102.823 2.222 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">Platform</h4>
+            <ul className="space-y-4">
+              {['Find Parking', 'List Spot', 'My Bookings', 'Rewards'].map((link) => (
+                <li key={link}>
+                  <Link href={link === 'List Spot' ? '/owner' : '/'} className="text-gray-400 hover:text-indigo-400 transition-colors text-sm">
+                    {link}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">Connect</h4>
+            <ul className="space-y-4">
+              <li><a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors text-sm">Twitter</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors text-sm">Discord</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-indigo-400 transition-colors text-sm">Mail Us</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">Protocol</h4>
+            <div className="p-1 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/5">
+              <div className="bg-black/40 p-4 rounded-lg">
+                <p className="text-xs text-gray-400 mb-2 font-medium">Built on Stacks</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-orange-500 shadow-lg shadow-orange-500/50" />
+                  <span className="text-xs font-bold text-white tracking-widest uppercase">Layer 2 Bitcoin</span>
+                </div>
               </div>
             </div>
-            <p className="text-sm text-gray-400 mb-4">
-              Decentralized parking spot booking on the Celo blockchain. Secure, transparent, and rewarding.
-            </p>
-            <div className="flex space-x-4">
-              <a
-                href="https://github.com/Uchechukwu-Ekezie/CarIn"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors"
-                aria-label="GitHub"
-              >
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-                </svg>
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors"
-                aria-label="Twitter"
-              >
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-                </svg>
-              </a>
-            </div>
-          </div>
-
-          {/* Product Links */}
-          <div>
-            <h3 className="text-white font-semibold mb-4">Product</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/" className="text-sm hover:text-white transition-colors">
-                  Find Parking
-                </Link>
-              </li>
-              <li>
-                <Link href="/owner" className="text-sm hover:text-white transition-colors">
-                  List Your Spot
-                </Link>
-              </li>
-              <li>
-                <Link href="/bookings" className="text-sm hover:text-white transition-colors">
-                  My Bookings
-                </Link>
-              </li>
-              <li>
-                <Link href="/rewards" className="text-sm hover:text-white transition-colors">
-                  Rewards Program
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Support Links */}
-          <div>
-            <h3 className="text-white font-semibold mb-4">Support</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/disputes" className="text-sm hover:text-white transition-colors">
-                  Dispute Resolution
-                </Link>
-              </li>
-              <li>
-                <a href="https://docs.celo.org" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
-                  Documentation
-                </a>
-              </li>
-              <li>
-                <a href="https://github.com/Uchechukwu-Ekezie/CarIn/issues" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-white transition-colors">
-                  Report an Issue
-                </a>
-              </li>
-              <li>
-                <Link href="/admin/disputes" className="text-sm hover:text-white transition-colors">
-                  Admin Panel
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Legal Links */}
-          <div>
-            <h3 className="text-white font-semibold mb-4">Legal</h3>
-            <ul className="space-y-2">
-              <li>
-                <a href="#" className="text-sm hover:text-white transition-colors">
-                  Privacy Policy
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-sm hover:text-white transition-colors">
-                  Terms of Service
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-sm hover:text-white transition-colors">
-                  Cookie Policy
-                </a>
-              </li>
-              <li>
-                <Link href="https://celo.org" target="_blank" className="text-sm hover:text-white transition-colors">
-                  Built on Celo
-                </Link>
-              </li>
-            </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-gray-400">
-            © {currentYear} CarIn. All rights reserved.
+        <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-gray-500 text-xs">
+            © {currentYear} CarIn. All Rights Reserved.
           </p>
-          <p className="text-sm text-gray-400 mt-4 md:mt-0">
-            Powered by{' '}
-            <a
-              href="https://celo.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              Celo Blockchain
-            </a>
-          </p>
+          <div className="flex items-center gap-6">
+            <a href="#" className="text-gray-500 hover:text-gray-300 text-xs transition-colors">Privacy</a>
+            <a href="#" className="text-gray-500 hover:text-gray-300 text-xs transition-colors">Terms</a>
+            <a href="#" className="text-gray-500 hover:text-gray-300 text-xs transition-colors">Cookies</a>
+          </div>
         </div>
       </div>
     </footer>

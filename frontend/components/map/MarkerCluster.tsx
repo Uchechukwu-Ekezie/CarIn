@@ -25,7 +25,7 @@ export default function MarkerCluster({ markers }: MarkerClusterProps) {
     if (!map) return;
 
     // Create marker cluster group
-    const markerClusterGroup = L.markerClusterGroup({
+    const markerClusterGroup = (L as any).markerClusterGroup({
       chunkedLoading: true,
       chunkInterval: 200,
       maxClusterRadius: 50,
@@ -37,7 +37,7 @@ export default function MarkerCluster({ markers }: MarkerClusterProps) {
     // Create markers and add to cluster group
     markers.forEach(({ position, popup, onClick }) => {
       const marker = L.marker(position);
-      
+
       if (popup) {
         marker.bindPopup(popup as any);
       }
