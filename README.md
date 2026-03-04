@@ -5,7 +5,7 @@ Welcome to CarIn, a decentralized solution for finding and booking parking spots
 ## Project Structure
 
 - **/frontend**: Contains the Next.js application.
-- **/smart-contracts**: Holds the Solidity smart contracts.
+- **/smart-contracts**: Holds the Calarity Contract.
 
 ## Prerequisites
 
