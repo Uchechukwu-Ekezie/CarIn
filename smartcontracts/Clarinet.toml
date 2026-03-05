@@ -1,0 +1,72 @@
+[project]
+name = "smartcontracts"
+description = ""
+authors = []
+telemetry = false
+cache_dir = "./.cache"
+
+# [contracts.counter]
+# path = "contracts/counter.clar"
+# epoch = "latest"
+
+# Check-checker settings:
+# trusted_sender: if true, inputs are trusted after tx_sender has been checked.
+# trusted_caller: if true, inputs are trusted after contract-caller has been checked.
+# callee_filter: if true, untrusted data may be passed into a private function without a
+# warning, if it gets checked inside. This check will also propagate up to the
+# caller.
+# More informations: https://www.hiro.so/blog/new-safety-checks-in-clarinet
+
+[repl.analysis]
+passes = ["check_checker"]
+check_checker = { trusted_sender = false, trusted_caller = false, callee_filter = false }
+
+[contracts]
+
+[contracts.user-registry]
+path = "contracts/user-registry.clar"
+clarity_version = 2
+epoch = "latest"
+
+[contracts.car-registry]
+path = "contracts/car-registry.clar"
+clarity_version = 2
+epoch = "latest"
+
+[contracts.parking-spot]
+path = "contracts/parking-spot.clar"
+clarity_version = 2
+epoch = "latest"
+
+[contracts.payment-escrow]
+path = "contracts/payment-escrow.clar"
+clarity_version = 2
+epoch = "latest"
+
+[contracts.dispute-resolution]
+path = "contracts/dispute-resolution.clar"
+clarity_version = 2
+epoch = "latest"
+depends_on = ["payment-escrow"]
+
+[contracts.booking]
+path = "contracts/booking.clar"
+clarity_version = 2
+epoch = "latest"
+depends_on = ["parking-spot", "payment-escrow"]
+
+[contracts.spot-reviews]
+path = "contracts/spot-reviews.clar"
+clarity_version = 2
+epoch = "latest"
+depends_on = ["booking", "parking-spot"]
+
+[contracts.carin-rewards-token]
+path = "contracts/carin-rewards-token.clar"
+clarity_version = 2
+epoch = "latest"
+
+[contracts.rewards-manager]
+path = "contracts/rewards-manager.clar"
+clarity_version = 2
+epoch = "latest"
