@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   other: {
     "talentapp:project_verification": "162e3b286041aa961be0879994d8863772fafb164e2fdf01ff284dccab88440fe61e3fce56657cbc37a734efbfa6d6b3432c1ba2df9bc6479880467984e1cf64",
   },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({

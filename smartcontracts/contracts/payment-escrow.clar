@@ -16,14 +16,14 @@
 
 ;; Data Variables 
 (define-data-var escrow-counter uint u0)
-(define-data-var contract-owner principal tx-sender)
+(define-constant contract-owner tx-sender)
 
 
 ;; Data Maps
 (define-map escrows
     uint
     {
-        booking-id: (string-ascii 50),
+        booking-id: uint,
         payer: principal,
         payee: principal,
         amount: uint,
@@ -33,7 +33,7 @@
 )
 
 ;; Create Escrow
-(define-public (create-escrow (booking-id (string-ascii 50)) (payee principal) (amount uint) (release-time uint))
+(define-public (create-escrow (booking-id uint) (payee principal) (amount uint) (release-time uint))
     (let
         (
             (escrow-id (+ (var-get escrow-counter) u1))
@@ -67,7 +67,7 @@
         )
         (asserts! (is-eq (get status escrow) status-pending) err-escrow-not-pending)
         (asserts! (>= burn-block-height (get release-time escrow)) err-release-time-not-reached)
-        (asserts! (or (is-eq tx-sender payee) (is-eq tx-sender (var-get contract-owner))) err-not-authorized)
+        (asserts! (or (is-eq tx-sender payee) (is-eq tx-sender contract-owner)) err-not-authorized)
         
         ;; Transfer STX from contract to payee
         (try! (as-contract (stx-transfer? amount tx-sender payee)))
@@ -86,7 +86,7 @@
             (amount (get amount escrow))
         )
         (asserts! (is-eq (get status escrow) status-pending) err-escrow-not-pending)
-        (asserts! (or (is-eq tx-sender payer) (is-eq tx-sender (var-get contract-owner))) err-not-authorized)
+        (asserts! (or (is-eq tx-sender payer) (is-eq tx-sender contract-owner)) err-not-authorized)
         
         ;; Transfer STX from contract to payer
         (try! (as-contract (stx-transfer? amount tx-sender payer)))
@@ -120,7 +120,7 @@
             (amount (get amount escrow))
         )
         (asserts! (is-eq (get status escrow) status-disputed) err-escrow-not-pending)
-        (asserts! (is-eq tx-sender (var-get contract-owner)) err-not-authorized)
+        (asserts! (is-eq tx-sender contract-owner) err-not-authorized)
         
         (if should-refund
             (begin

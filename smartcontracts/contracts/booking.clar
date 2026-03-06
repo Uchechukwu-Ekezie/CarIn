@@ -32,7 +32,8 @@
         total-price: uint,
         check-in-time: uint,
         check-out-time: uint,
-        status: uint
+        status: uint,
+        escrow-id: uint
     }
 )
 
@@ -46,19 +47,26 @@
         acc ;; skip further checks if overlap already found
         (let
             (
-                (booking (unwrap-panic (map-get? bookings booking-id)))
-                (b-start (get start-time booking))
-                (b-end (get end-time booking))
-                (b-status (get status booking))
                 (chk-start (get start acc))
                 (chk-end (get end acc))
+                (booking-opt (map-get? bookings booking-id))
             )
-            (if (is-eq b-status status-active)
-                (if (or (<= chk-end b-start) (>= chk-start b-end))
-                    ;; No overlap
-                    acc
-                    ;; Overlap found!
-                    (merge acc {has-overlap: true})
+            (match booking-opt booking
+                (let
+                    (
+                        (b-start (get start-time booking))
+                        (b-end (get end-time booking))
+                        (b-status (get status booking))
+                    )
+                    (if (is-eq b-status status-active)
+                        (if (or (<= chk-end b-start) (>= chk-start b-end))
+                            ;; No overlap
+                            acc
+                            ;; Overlap found!
+                            (merge acc {has-overlap: true})
+                        )
+                        acc
+                    )
                 )
                 acc
             )
@@ -93,30 +101,29 @@
         (asserts! (is-time-slot-available spot-id start-time end-time) err-time-slot-already-booked)
 
         ;; Duration in blocks (Stacks blocks are ~10 mins)
-        ;; So a duration of 6 blocks = 1 hour
         (let
             (
                 (duration (- end-time start-time))
-                ;; total-price = (duration / 6) * price-per-hour (roughly)
-                ;; but for simplicity, duration * price-per-block
                 (total-price (* duration price-per-hour))
             )
-            ;; Create Escrow using payment-escrow (assuming it's fixed to 50 ascii string max for booking-id)
-            ;; We map booking-id uint to ascii via simpler means or rely on escrow's own ID
-            ;; Skipping cross-contract escrow call here for brevity, but this is the hook point:
-            ;; (try! (contract-call? .payment-escrow create-escrow ...))
+            (let
+                (
+                    (escrow-id (try! (contract-call? .payment-escrow create-escrow booking-id spot-owner total-price end-time)))
+                )
+                (try! (contract-call? .user-registry increment-bookings tx-sender))
 
-            (map-set bookings booking-id {
-                spot-id: spot-id,
-                user: tx-sender,
-                car-id: car-id,
-                start-time: start-time,
-                end-time: end-time,
-                total-price: total-price,
-                check-in-time: u0,
-                check-out-time: u0,
-                status: status-active
-            })
+                (map-set bookings booking-id {
+                    spot-id: spot-id,
+                    user: tx-sender,
+                    car-id: car-id,
+                    start-time: start-time,
+                    end-time: end-time,
+                    total-price: total-price,
+                    check-in-time: u0,
+                    check-out-time: u0,
+                    status: status-active,
+                    escrow-id: escrow-id
+                })
 
             ;; Update mappings
             (let
@@ -131,6 +138,7 @@
 
             (var-set booking-counter booking-id)
             (ok booking-id)
+            )
         )
     )
 )
@@ -147,9 +155,27 @@
         (asserts! (> (get start-time booking) burn-block-height) err-cannot-cancel-active-booking)
 
         ;; Cancel Escrow
-        ;; (try! (contract-call? .payment-escrow refund-payer escrow-id))
+        (try! (contract-call? .payment-escrow refund-payer (get escrow-id booking)))
 
         (map-set bookings booking-id (merge booking {status: status-cancelled}))
+        (ok true)
+    )
+)
+
+;; Complete a booking
+(define-public (complete-booking (booking-id uint))
+    (let
+        (
+            (booking (unwrap! (map-get? bookings booking-id) err-spot-not-found))
+            (spot-details (unwrap! (contract-call? .parking-spot get-spot (get spot-id booking)) err-spot-not-found))
+        )
+        (asserts! (or (is-eq tx-sender (get user booking)) (is-eq tx-sender (get owner spot-details))) err-not-authorized)
+        (asserts! (is-eq (get status booking) status-active) err-booking-not-active)
+
+        ;; Release Escrow Funds to Host
+        (try! (contract-call? .payment-escrow release-funds (get escrow-id booking)))
+
+        (map-set bookings booking-id (merge booking {status: status-completed}))
         (ok true)
     )
 )

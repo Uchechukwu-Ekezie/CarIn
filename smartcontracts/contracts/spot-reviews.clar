@@ -2,7 +2,6 @@
 ;; Allows users to leave 1-5 star reviews after a completed booking
 
 ;; Constants
-(define-constant err-not-authorized (err u100))
 (define-constant err-review-already-exists (err u101))
 (define-constant err-invalid-rating (err u102))
 

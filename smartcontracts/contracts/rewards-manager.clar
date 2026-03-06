@@ -6,9 +6,6 @@
 (define-constant err-no-pending-rewards (err u501))
 (define-constant contract-owner tx-sender)
 
-;; Reward amounts
-(define-constant inaccuracy-reward u1000000) ;; 1 CIRT
-(define-constant referral-reward u500000)   ;; 0.5 CIRT
 
 ;; Data Maps
 (define-map pending-rewards

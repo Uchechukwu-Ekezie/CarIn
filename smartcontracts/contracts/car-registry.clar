@@ -4,7 +4,6 @@
 ;; Constants
 (define-constant err-not-authorized (err u100))
 (define-constant err-car-not-found (err u101))
-(define-constant err-user-not-verified (err u102))
 
 ;; Data Variables
 (define-data-var car-counter uint u0)

@@ -7,7 +7,7 @@
 (define-constant err-user-not-found (err u102))
 
 ;; Data Variables
-(define-data-var contract-owner principal tx-sender)
+(define-constant contract-owner tx-sender)
 
 ;; Data Maps
 (define-map users
@@ -46,7 +46,7 @@
         (
             (user-data (unwrap! (map-get? users user) err-user-not-found))
         )
-        (asserts! (is-eq tx-sender (var-get contract-owner)) err-not-authorized)
+        (asserts! (is-eq tx-sender contract-owner) err-not-authorized)
         (ok (map-set users user (merge user-data {is-verified: true})))
     )
 )

@@ -9,14 +9,14 @@
 ;; Data Variables
 (define-data-var dispute-counter uint u0)
 (define-data-var evidence-counter uint u0)
-(define-data-var contract-owner principal tx-sender)
+(define-constant contract-owner tx-sender)
 
 ;; Data Maps
 (define-map disputes
     uint
     {
         escrow-id: uint,
-        booking-id: (string-ascii 50),
+        booking-id: uint,
         filed-by: principal,
         opposing-party: principal,
         reason: (string-utf8 150),
@@ -34,7 +34,7 @@
 )
 
 ;; Create Dispute (Simplified version)
-(define-public (file-dispute (escrow-id uint) (booking-id (string-ascii 50)) (opposing-party principal) (reason (string-utf8 150)))
+(define-public (file-dispute (escrow-id uint) (booking-id uint) (opposing-party principal) (reason (string-utf8 150)))
     (let
         (
             (dispute-id (+ (var-get dispute-counter) u1))
@@ -88,7 +88,7 @@
             (escrow-id (get escrow-id dispute))
         )
         (asserts! (is-eq (get status dispute) u0) err-dispute-already-resolved)
-        (asserts! (is-eq tx-sender (var-get contract-owner)) err-not-authorized)
+        (asserts! (is-eq tx-sender contract-owner) err-not-authorized)
         
         ;; Resolve the escrow
         (try! (contract-call? .payment-escrow resolve-dispute escrow-id refund-payer))
