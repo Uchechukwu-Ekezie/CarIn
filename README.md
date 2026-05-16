@@ -1,5 +1,11 @@
 # CarIn
 
+![Stacks](https://img.shields.io/badge/blockchain-Stacks-5546FF)
+![Clarity](https://img.shields.io/badge/contracts-Clarity_2.0-7765E3)
+![Next.js](https://img.shields.io/badge/frontend-Next.js_14-000000)
+![TypeScript](https://img.shields.io/badge/lang-TypeScript-3178C6)
+![Node](https://img.shields.io/badge/node-%E2%89%A518.17-339933)
+
 CarIn is a decentralized peer-to-peer parking spot booking platform. Owners list spots; renters discover them on a map, book, and pay; funds are held in on-chain escrow until the booking completes. Disputes, reviews, and a rewards token round out the system.
 
 The canonical implementation targets the **Stacks** blockchain (Clarity). A reference Solidity implementation for **Celo** is kept under `smartcontracts-evm/` (see `ARCHITECTURE.md` for the dual-track rationale).
