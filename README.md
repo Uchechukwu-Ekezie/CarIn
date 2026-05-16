@@ -1,51 +1,66 @@
 # CarIn
 
-Welcome to CarIn, a decentralized solution for finding and booking parking spots. This README provides the necessary details to get the project up and running on your local machine.
+CarIn is a decentralized peer-to-peer parking spot booking platform. Owners list spots; renters discover them on a map, book, and pay; funds are held in on-chain escrow until the booking completes. Disputes, reviews, and a rewards token round out the system.
+
+The canonical implementation targets the **Stacks** blockchain (Clarity). A reference Solidity implementation for **Celo** is kept under `smartcontracts-evm/` (see `ARCHITECTURE.md` for the dual-track rationale).
 
 ## Project Structure
 
-- **/frontend**: Contains the Next.js application.
-- **/smart-contracts**: Holds the Calarity Contract.
+| Path | Purpose |
+| --- | --- |
+| `frontend/` | Next.js 14 app — wallet, map discovery, booking, owner dashboard |
+| `smartcontracts/` | Clarity contracts (primary) — Clarinet 2.0 project |
+| `smartcontracts-evm/` | Solidity contracts (reference) — Hardhat project, Celo target |
+| `contributions/` | Proposed V2 Solidity contracts under review |
+| `.github/` | Issue/PR templates and CI workflows |
 
 ## Prerequisites
 
-- **Node.js**: Version `18.17.0` or higher.
-- **npm**: Version `9.0.0` or higher.
+- **Node.js** `18.17.0` or higher (see `.nvmrc`)
+- **npm** `9.0.0` or higher
+- **Clarinet** (for working on Clarity contracts) — install via `brew install clarinet`
 
 ## Getting Started
 
-To begin, clone the repository and install the required dependencies for both the frontend and smart contracts.
-
-### Frontend Setup
-
-Navigate to the `frontend` directory and run the following commands:
-
 ```bash
-npm install
-npm run dev
+git clone https://github.com/Uchechukwu-Ekezie/CarIn.git
+cd CarIn
 ```
-
-### Smart Contracts Setup
-
-In the `smart-contracts` directory, set up your environment by creating a `.env` file with the required variables (e.g., `PRIVATE_KEY`, `MUMBAI_RPC_URL`). Then, run:
-
-```bash
-npm install
-npx hardhat compile
-```
-
-## Available Scripts
 
 ### Frontend
 
-- `npm run dev`: Starts the development server.
-- `npm run build`: Builds the application for production.
-- `npm run start`: Runs the production build.
-- `npm run lint`: Lints the codebase.
+```bash
+cd frontend
+npm install
+cp .env.example .env.local   # if present, otherwise see frontend/README.md
+npm run dev
+```
 
-### Smart Contracts
+App runs on http://localhost:3000.
 
-- `npx hardhat test`: Executes the test suite.
-- `npx hardhat deploy --network base`: Deploys contracts to the Mumbai testnet.
+### Clarity contracts
 
-By following these instructions, you'll have a fully functional local environment for both the frontend and smart contracts.
+```bash
+cd smartcontracts
+clarinet check       # static analysis on all contracts
+npm install
+npm test             # Clarinet TypeScript test runner
+```
+
+### EVM contracts (reference)
+
+```bash
+cd smartcontracts-evm
+npm install
+npx hardhat compile
+npx hardhat test
+```
+
+## Further reading
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) — system design and the Stacks vs. EVM strategy
+- [CONTRIBUTING.md](CONTRIBUTING.md) — branch, commit, and PR conventions
+- [SECURITY.md](SECURITY.md) — vulnerability reporting
+- [`frontend/README.md`](frontend/README.md)
+- [`smartcontracts-evm/README.md`](smartcontracts-evm/README.md)
+- [`contributions/README.md`](contributions/README.md)
