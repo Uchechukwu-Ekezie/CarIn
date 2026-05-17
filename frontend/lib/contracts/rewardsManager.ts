@@ -1,34 +1,59 @@
 /**
- * RewardsManager contract constants and utilities for Stacks
+ * Typed surface for the `rewards-manager` Clarity contract.
  */
 
-// Contract addresses for Stacks
-export const REWARDS_MANAGER_ADDRESSES = {
-  testnet: process.env.NEXT_PUBLIC_REWARDS_MANAGER_ADDRESS_TESTNET || "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.rewards-manager",
-  mainnet: process.env.NEXT_PUBLIC_REWARDS_MANAGER_ADDRESS_MAINNET || "",
-};
+import {
+    fetchCallReadOnlyFunction,
+    uintCV,
+    standardPrincipalCV,
+    cvToValue,
+    type ClarityValue,
+} from "@stacks/transactions";
 
-// Reward types enum
-export enum RewardType {
-  InaccuracyReport = 0,
-  SpotShare = 1,
-  Referral = 2,
-  CommunityContribution = 3,
+import { getStacksNetwork, getContractRef, getDeployerAddress } from "./network";
+
+const REF = () => getContractRef("rewardsManager");
+
+export async function getPendingRewards(
+    address: string,
+    senderAddress?: string,
+): Promise<bigint> {
+    const result = await fetchCallReadOnlyFunction({
+        ...REF(),
+        functionName: "get-pending-rewards",
+        functionArgs: [standardPrincipalCV(address)],
+        network: getStacksNetwork(),
+        senderAddress: senderAddress ?? getDeployerAddress(),
+    });
+    // Returns a bare uint (not optional, not response).
+    return BigInt(cvToValue(result as ClarityValue) as bigint | number);
 }
 
-/**
- * Interface for Stacks-based rewards management
- */
-export interface StacksRewardSession {
-  stxAddress: string;
-  network: "testnet" | "mainnet";
+export function buildAddRewardCall(args: {
+    userAddress: string;
+    amount: bigint | number | string;
+}) {
+    return {
+        ...REF(),
+        functionName: "add-reward",
+        functionArgs: [
+            standardPrincipalCV(args.userAddress),
+            uintCV(BigInt(args.amount)),
+        ],
+        network: getStacksNetwork(),
+    };
 }
 
-// Mock hash function (Stacks uses SipHash or SHA-256 differently, but for types we just need string)
-export function calculateReferralHash(
-  referrer: string,
-  referee: string,
-  spotId: string
-): string {
-  return `REF-${referrer.slice(-4)}-${referee.slice(-4)}-${spotId}`;
+export function buildClaimRewardsCall() {
+    return {
+        ...REF(),
+        functionName: "claim-rewards",
+        functionArgs: [],
+        network: getStacksNetwork(),
+    };
+    // NOTE: as of the current deployment, claim-rewards reverts for
+    // anyone except the deployer because of an auth check in the
+    // underlying carin-rewards-token.mint. See PR 3's
+    // tests/rewards-manager.test.ts BUG: test for details. The build
+    // helper above stays useful for the eventual fix.
 }
