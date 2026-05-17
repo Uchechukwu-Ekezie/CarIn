@@ -2,91 +2,117 @@ import { describe, expect, it } from "vitest";
 import { stringUtf8CV, uintCV, principalCV, boolCV, tupleCV } from "@stacks/transactions";
 
 const accounts = simnet.getAccounts();
-const deployer = accounts.get("deployer")!;
 const wallet1 = accounts.get("wallet_1")!;
 const wallet2 = accounts.get("wallet_2")!;
 
+function listSpot(location: string, price: number, sender: string) {
+    return simnet.callPublicFn(
+        "parking-spot",
+        "list-spot",
+        [stringUtf8CV(location), uintCV(price)],
+        sender,
+    );
+}
+
+function getSpot(id: number) {
+    return simnet.callReadOnlyFn("parking-spot", "get-spot", [uintCV(id)], wallet1).result;
+}
+
 describe("parking-spot", () => {
     it("allows a user to list a parking spot", () => {
-        const { result } = simnet.callPublicFn(
-            "parking-spot",
-            "list-spot",
-            [
-                stringUtf8CV("123 Main St"),
-                uintCV(100)
-            ],
-            wallet1
-        );
+        const listedAt = simnet.burnBlockHeight;
+        const { result } = listSpot("123 Main St", 100, wallet1);
 
         expect(result).toBeOk(uintCV(1));
-
-        const spotDetails = simnet.callReadOnlyFn(
-            "parking-spot",
-            "get-spot",
-            [uintCV(1)],
-            wallet1
-        );
-        expect(spotDetails.result).toBeSome(tupleCV({
+        expect(getSpot(1)).toBeSome(tupleCV({
             "owner": principalCV(wallet1),
             "location": stringUtf8CV("123 Main St"),
             "price-per-hour": uintCV(100),
             "is-available": boolCV(true),
-            "created-at": uintCV(0)
+            "created-at": uintCV(listedAt),
         }));
     });
 
-    it("allows a user to toggle spot availability", () => {
-        // First list a spot
-        simnet.callPublicFn(
-            "parking-spot",
-            "list-spot",
-            [
-                stringUtf8CV("123 Main St"),
-                uintCV(100)
-            ],
-            wallet1
-        );
+    it("allows the owner to update spot availability", () => {
+        const listedAt = simnet.burnBlockHeight;
+        listSpot("123 Main St", 100, wallet1);
 
-        // Toggle availability
         const { result } = simnet.callPublicFn(
             "parking-spot",
-            "toggle-availability",
+            "update-spot-availability",
             [uintCV(1), boolCV(false)],
-            wallet1
+            wallet1,
         );
 
         expect(result).toBeOk(boolCV(true));
-
-        const spotDetails = simnet.callReadOnlyFn(
-            "parking-spot",
-            "get-spot",
-            [uintCV(1)],
-            wallet1
-        );
-        // We know it drops to SOME data map. Just using string parsing for simplicity
-        expect(spotDetails.result).toHaveProperty('value.data.is-available', boolCV(false));
+        expect(getSpot(1)).toBeSome(tupleCV({
+            "owner": principalCV(wallet1),
+            "location": stringUtf8CV("123 Main St"),
+            "price-per-hour": uintCV(100),
+            "is-available": boolCV(false),
+            "created-at": uintCV(listedAt),
+        }));
     });
 
-    it("prevents non-owners from toggling availability", () => {
-        // First list a spot with wallet1
-        simnet.callPublicFn(
-            "parking-spot",
-            "list-spot",
-            [
-                stringUtf8CV("123 Main St"),
-                uintCV(100)
-            ],
-            wallet1
-        );
+    it("prevents non-owners from updating availability", () => {
+        listSpot("123 Main St", 100, wallet1);
 
-        // Try to toggle availability with wallet2
         const { result } = simnet.callPublicFn(
             "parking-spot",
-            "toggle-availability",
+            "update-spot-availability",
             [uintCV(1), boolCV(false)],
-            wallet2
+            wallet2,
         );
 
-        expect(result).toBeErr(uintCV(100)); // err-not-authorized
+        expect(result).toBeErr(uintCV(100)); // err-not-owner
+    });
+
+    it("rejects a listing with a zero price", () => {
+        const { result } = listSpot("123 Main St", 0, wallet1);
+        expect(result).toBeErr(uintCV(101)); // err-invalid-price
+    });
+
+    it("returns none for an unknown spot", () => {
+        expect(getSpot(999)).toBeNone();
+    });
+
+    it("returns none from get-spot-owner for an unknown spot", () => {
+        const { result } = simnet.callReadOnlyFn(
+            "parking-spot",
+            "get-spot-owner",
+            [uintCV(999)],
+            wallet1,
+        );
+        expect(result).toBeNone();
+    });
+
+    it("returns the owner from get-spot-owner for a listed spot", () => {
+        listSpot("123 Main St", 100, wallet1);
+        const { result } = simnet.callReadOnlyFn(
+            "parking-spot",
+            "get-spot-owner",
+            [uintCV(1)],
+            wallet2,
+        );
+        expect(result).toBeSome(principalCV(wallet1));
+    });
+
+    it("rejects updating availability on a non-existent spot", () => {
+        const { result } = simnet.callPublicFn(
+            "parking-spot",
+            "update-spot-availability",
+            [uintCV(999), boolCV(false)],
+            wallet1,
+        );
+        expect(result).toBeErr(uintCV(102)); // err-spot-not-found
+    });
+
+    it("assigns monotonically-increasing spot ids", () => {
+        const a = listSpot("A", 100, wallet1);
+        const b = listSpot("B", 200, wallet1);
+        const c = listSpot("C", 300, wallet2);
+        expect(a.result).toBeOk(uintCV(1));
+        expect(b.result).toBeOk(uintCV(2));
+        expect(c.result).toBeOk(uintCV(3));
     });
 });
