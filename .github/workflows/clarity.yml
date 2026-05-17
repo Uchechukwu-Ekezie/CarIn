@@ -30,3 +30,22 @@ jobs:
 
       - run: npm ci
       - run: npm test
+
+  clarinet-check:
+    name: Clarinet check
+    runs-on: ubuntu-latest
+    env:
+      CLARINET_VERSION: '2.11.2'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Clarinet
+        run: |
+          curl -L -o clarinet.tar.gz \
+            "https://github.com/hirosystems/clarinet/releases/download/v${CLARINET_VERSION}/clarinet-linux-x64-glibc.tar.gz"
+          tar -xzf clarinet.tar.gz
+          sudo mv clarinet /usr/local/bin/clarinet
+          clarinet --version
+        working-directory: .
+
+      - run: clarinet check
