@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@stacks/connect": "latest",
+    "@stacks/network": "^7.3.1",
+    "@stacks/transactions": "^7.4.0",
     "@types/leaflet": "^1.9.21",
     "@types/leaflet.markercluster": "^1.5.6",
     "date-fns": "^2.30.0",
