@@ -66,4 +66,53 @@ describe("parking-spot", () => {
 
         expect(result).toBeErr(uintCV(100)); // err-not-owner
     });
+
+    it("rejects a listing with a zero price", () => {
+        const { result } = listSpot("123 Main St", 0, wallet1);
+        expect(result).toBeErr(uintCV(101)); // err-invalid-price
+    });
+
+    it("returns none for an unknown spot", () => {
+        expect(getSpot(999)).toBeNone();
+    });
+
+    it("returns none from get-spot-owner for an unknown spot", () => {
+        const { result } = simnet.callReadOnlyFn(
+            "parking-spot",
+            "get-spot-owner",
+            [uintCV(999)],
+            wallet1,
+        );
+        expect(result).toBeNone();
+    });
+
+    it("returns the owner from get-spot-owner for a listed spot", () => {
+        listSpot("123 Main St", 100, wallet1);
+        const { result } = simnet.callReadOnlyFn(
+            "parking-spot",
+            "get-spot-owner",
+            [uintCV(1)],
+            wallet2,
+        );
+        expect(result).toBeSome(principalCV(wallet1));
+    });
+
+    it("rejects updating availability on a non-existent spot", () => {
+        const { result } = simnet.callPublicFn(
+            "parking-spot",
+            "update-spot-availability",
+            [uintCV(999), boolCV(false)],
+            wallet1,
+        );
+        expect(result).toBeErr(uintCV(102)); // err-spot-not-found
+    });
+
+    it("assigns monotonically-increasing spot ids", () => {
+        const a = listSpot("A", 100, wallet1);
+        const b = listSpot("B", 200, wallet1);
+        const c = listSpot("C", 300, wallet2);
+        expect(a.result).toBeOk(uintCV(1));
+        expect(b.result).toBeOk(uintCV(2));
+        expect(c.result).toBeOk(uintCV(3));
+    });
 });
