@@ -84,17 +84,11 @@ export async function uploadMetadataToIPFS(metadata: unknown): Promise<IPFSUploa
 
 /**
  * Build a gateway URL for an existing CID. Kept here for
- * backwards-compatibility with the previous module surface; a
- * follow-up commit extracts the gateway logic into its own module
- * and re-exports it from here.
+ * backwards-compatibility with the previous module surface; the
+ * implementation lives in lib/ipfs/gateway.ts.
  */
-export function getIPFSGatewayURL(hash: string): string {
-    const base =
-        (typeof process !== "undefined"
-            ? process.env.NEXT_PUBLIC_IPFS_GATEWAY
-            : undefined) ?? "https://gateway.pinata.cloud";
-    return `${base.replace(/\/$/, "")}/ipfs/${hash}`;
-}
+export { buildGatewayUrl as getIPFSGatewayURL } from "./ipfs/gateway";
+export { getFallbackGateways, normaliseCid } from "./ipfs/gateway";
 
 // ---------------------------------------------------------------------------
 
