@@ -1,64 +1,60 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+
+import { pinFile, PinataConfigError, PinataUploadError } from "@/lib/ipfs/pinata";
+import { validateEvidenceUpload } from "@/lib/ipfs/validation";
 
 /**
- * API route for uploading files to IPFS
- * This is a placeholder - implement with actual IPFS service (Pinata, Infura, etc.)
+ * POST /api/ipfs/upload
+ * multipart/form-data with a single "file" field.
+ *
+ * Returns: { cid, pinSize, pinnedAt, url } on success.
+ *
+ * Validates against `validateEvidenceUpload` (a superset of image
+ * types, since the same endpoint serves both spot photos and
+ * dispute evidence). The same validator is used in the picker so
+ * the limits stay in sync.
  */
 export async function POST(request: NextRequest) {
-  try {
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
-
-    if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      );
+    let formData: FormData;
+    try {
+        formData = await request.formData();
+    } catch {
+        return NextResponse.json({ error: "expected multipart/form-data" }, { status: 400 });
     }
 
-    // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024;
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: 'File size exceeds 10MB limit' },
-        { status: 400 }
-      );
+    const file = formData.get("file");
+    if (!(file instanceof File)) {
+        return NextResponse.json({ error: "missing or non-file 'file' field" }, { status: 400 });
     }
 
-    // TODO: Implement actual IPFS upload
-    // Example using Pinata:
-    /*
-    const pinataApiKey = process.env.PINATA_API_KEY;
-    const pinataSecretKey = process.env.PINATA_SECRET_KEY;
-    
-    const formData = new FormData();
-    formData.append('file', file);
+    const validation = validateEvidenceUpload(file);
+    if (!validation.ok) {
+        return NextResponse.json({ error: validation.reason }, { status: 400 });
+    }
 
-    const response = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
-      method: 'POST',
-      headers: {
-        'pinata_api_key': pinataApiKey,
-        'pinata_secret_api_key': pinataSecretKey,
-      },
-      body: formData,
-    });
-
-    const data = await response.json();
-    return NextResponse.json({ hash: data.IpfsHash });
-    */
-
-    // Placeholder response
-    const mockHash = 'Qm' + Buffer.from(file.name + Date.now()).toString('base64').slice(0, 42);
-    return NextResponse.json({ hash: mockHash });
-  } catch (error: any) {
-    console.error('IPFS upload error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to upload to IPFS' },
-      { status: 500 }
-    );
-  }
+    try {
+        const result = await pinFile(file, file.name);
+        const gateway = gatewayBase();
+        return NextResponse.json({
+            ...result,
+            url: `${gateway}/ipfs/${result.cid}`,
+        });
+    } catch (err: unknown) {
+        if (err instanceof PinataConfigError) {
+            // 500 (not 400) — this is a server misconfiguration, not a bad client request.
+            return NextResponse.json({ error: err.message }, { status: 500 });
+        }
+        if (err instanceof PinataUploadError) {
+            return NextResponse.json(
+                { error: err.message },
+                { status: err.status ?? 502 },
+            );
+        }
+        const message = err instanceof Error ? err.message : "unknown upload error";
+        return NextResponse.json({ error: message }, { status: 500 });
+    }
 }
 
-
-
-
+function gatewayBase(): string {
+    return process.env.NEXT_PUBLIC_IPFS_GATEWAY ?? "https://gateway.pinata.cloud";
+}
