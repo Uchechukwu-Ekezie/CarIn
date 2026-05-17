@@ -1,0 +1,51 @@
+name: Clarity
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'smartcontracts/**'
+      - '.github/workflows/clarity.yml'
+  pull_request:
+    paths:
+      - 'smartcontracts/**'
+      - '.github/workflows/clarity.yml'
+
+defaults:
+  run:
+    working-directory: smartcontracts
+
+jobs:
+  vitest:
+    name: Vitest (clarinet-sdk)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: smartcontracts/package-lock.json
+
+      - run: npm ci
+      - run: npm test
+
+  clarinet-check:
+    name: Clarinet check
+    runs-on: ubuntu-latest
+    env:
+      CLARINET_VERSION: '2.11.2'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Clarinet
+        run: |
+          curl -L -o clarinet.tar.gz \
+            "https://github.com/hirosystems/clarinet/releases/download/v${CLARINET_VERSION}/clarinet-linux-x64-glibc.tar.gz"
+          tar -xzf clarinet.tar.gz
+          sudo mv clarinet /usr/local/bin/clarinet
+          clarinet --version
+        working-directory: .
+
+      - run: clarinet check

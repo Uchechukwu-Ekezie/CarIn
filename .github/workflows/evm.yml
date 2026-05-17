@@ -1,0 +1,64 @@
+name: EVM
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'smartcontracts-evm/**'
+      - 'contributions/**'
+      - '.github/workflows/evm.yml'
+  pull_request:
+    paths:
+      - 'smartcontracts-evm/**'
+      - 'contributions/**'
+      - '.github/workflows/evm.yml'
+
+defaults:
+  run:
+    working-directory: smartcontracts-evm
+
+jobs:
+  compile:
+    name: Hardhat compile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: smartcontracts-evm/package-lock.json
+
+      - run: npm ci
+      - run: npm run compile
+
+  test:
+    name: Hardhat test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: smartcontracts-evm/package-lock.json
+
+      - run: npm ci
+      - run: npm test
+
+  solhint:
+    name: Solhint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: smartcontracts-evm/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
