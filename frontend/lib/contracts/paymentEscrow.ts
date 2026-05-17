@@ -1,40 +1,112 @@
 /**
- * PaymentEscrow contract constants and utilities for Stacks
+ * Typed surface for the `payment-escrow` Clarity contract.
  */
 
-// Contract addresses for Stacks
-export const PAYMENT_ESCROW_ADDRESSES = {
-  testnet: process.env.NEXT_PUBLIC_PAYMENT_ESCROW_ADDRESS_TESTNET || "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.payment-escrow",
-  mainnet: process.env.NEXT_PUBLIC_PAYMENT_ESCROW_ADDRESS_MAINNET || "",
-};
+import {
+    fetchCallReadOnlyFunction,
+    uintCV,
+    boolCV,
+    standardPrincipalCV,
+} from "@stacks/transactions";
 
-export interface EscrowDetails {
-  escrowId: string;
-  bookingId: string;
-  payer: string;
-  payee: string;
-  amount: string;
-  token?: string;
-  releaseTime: number;
-  status: number;
+import { getStacksNetwork, getContractRef, getDeployerAddress } from "./network";
+import { unwrapOptionalTuple, microStxToStx } from "./codec";
+
+export const ESCROW_STATUS = {
+    PENDING: 0,
+    RELEASED: 1,
+    REFUNDED: 2,
+    DISPUTED: 3,
+} as const;
+
+export type EscrowStatus = (typeof ESCROW_STATUS)[keyof typeof ESCROW_STATUS];
+
+export interface EscrowRecord {
+    id: number;
+    bookingId: number;
+    payer: string;
+    payee: string;
+    amountMicroStx: bigint;
+    amount: string;
+    releaseTime: number;
+    status: EscrowStatus;
 }
 
-/**
- * Mock function to get escrow details from Stacks
- */
-export async function getEscrowDetails(
-  escrowId: string,
-  network: "testnet" | "mainnet" = "testnet"
-): Promise<EscrowDetails> {
-  console.log(`Fetching Stacks escrow ${escrowId} on ${network}...`);
-  // Mock implementation
-  return {
-    escrowId,
-    bookingId: "BOOK-123",
-    payer: "ST1PQ...",
-    payee: "ST2ABC...",
-    amount: "1000000",
-    releaseTime: Math.floor(Date.now() / 1000) + 3600,
-    status: 1,
-  };
+const REF = () => getContractRef("paymentEscrow");
+
+export async function getEscrow(
+    escrowId: number | bigint,
+    senderAddress?: string,
+): Promise<EscrowRecord | null> {
+    const result = await fetchCallReadOnlyFunction({
+        ...REF(),
+        functionName: "get-escrow",
+        functionArgs: [uintCV(BigInt(escrowId))],
+        network: getStacksNetwork(),
+        senderAddress: senderAddress ?? getDeployerAddress(),
+    });
+
+    const tuple = unwrapOptionalTuple(result);
+    if (!tuple) return null;
+
+    const amount = BigInt(tuple["amount"] as bigint);
+    return {
+        id: Number(escrowId),
+        bookingId: Number(tuple["booking-id"]),
+        payer: String(tuple["payer"]),
+        payee: String(tuple["payee"]),
+        amountMicroStx: amount,
+        amount: microStxToStx(amount),
+        releaseTime: Number(tuple["release-time"]),
+        status: Number(tuple["status"]) as EscrowStatus,
+    };
+}
+
+export function buildCreateEscrowCall(args: {
+    bookingId: number | bigint;
+    payeeAddress: string;
+    amountMicroStx: bigint | number | string;
+    releaseTime: number | bigint;
+}) {
+    return {
+        ...REF(),
+        functionName: "create-escrow",
+        functionArgs: [
+            uintCV(BigInt(args.bookingId)),
+            standardPrincipalCV(args.payeeAddress),
+            uintCV(BigInt(args.amountMicroStx)),
+            uintCV(BigInt(args.releaseTime)),
+        ],
+        network: getStacksNetwork(),
+    };
+}
+
+export function buildReleaseFundsCall(escrowId: number | bigint) {
+    return {
+        ...REF(),
+        functionName: "release-funds",
+        functionArgs: [uintCV(BigInt(escrowId))],
+        network: getStacksNetwork(),
+    };
+}
+
+export function buildRefundPayerCall(escrowId: number | bigint) {
+    return {
+        ...REF(),
+        functionName: "refund-payer",
+        functionArgs: [uintCV(BigInt(escrowId))],
+        network: getStacksNetwork(),
+    };
+}
+
+export function buildResolveDisputeCall(args: {
+    escrowId: number | bigint;
+    refundPayer: boolean;
+}) {
+    return {
+        ...REF(),
+        functionName: "resolve-dispute",
+        functionArgs: [uintCV(BigInt(args.escrowId)), boolCV(args.refundPayer)],
+        network: getStacksNetwork(),
+    };
 }
