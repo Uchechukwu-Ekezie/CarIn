@@ -64,9 +64,20 @@ npx hardhat test
 
 ## Further reading
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — system design and the Stacks vs. EVM strategy
-- [CONTRIBUTING.md](CONTRIBUTING.md) — branch, commit, and PR conventions
-- [SECURITY.md](SECURITY.md) — vulnerability reporting
-- [`frontend/README.md`](frontend/README.md)
-- [`smartcontracts-evm/README.md`](smartcontracts-evm/README.md)
-- [`contributions/README.md`](contributions/README.md)
+| Doc | What it covers |
+| --- | --- |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System design and the Stacks vs. EVM dual-track strategy |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Branch, commit, and PR conventions |
+| [SECURITY.md](SECURITY.md) | How to report a vulnerability privately |
+| [`frontend/README.md`](frontend/README.md) | Next.js app setup and feature surface |
+| [`smartcontracts/Clarinet.toml`](smartcontracts/Clarinet.toml) | Clarity contract manifest |
+| [`smartcontracts-evm/README.md`](smartcontracts-evm/README.md) | Solidity reference implementation |
+| [`contributions/README.md`](contributions/README.md) | Proposed V2 contracts under review |
+
+## Status
+
+CarIn is pre-production. The Clarity contract surface is in place
+and the EVM reference implementation has a full Hardhat test suite,
+but the frontend-to-contract integration and a complete Clarinet
+test suite are still in progress. See `ARCHITECTURE.md` → "What is
+not here yet" for the current punch list.
