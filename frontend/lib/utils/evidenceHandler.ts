@@ -3,6 +3,10 @@
  * Utilities for handling dispute evidence submission, IPFS uploads, and validation
  */
 
+import { uploadToIPFS } from "@/lib/ipfs";
+import { buildGatewayUrl } from "@/lib/ipfs/gateway";
+import { validateEvidenceUpload } from "@/lib/ipfs/validation";
+
 export enum EvidenceType {
   CheckInTimestamp = 0,
   CheckOutTimestamp = 1,
@@ -32,35 +36,22 @@ export interface DisputeEvidence {
 }
 
 /**
- * Convert file to IPFS hash
- * This is a placeholder - actual implementation would upload to IPFS
+ * Upload dispute evidence to IPFS. Returns the CID (Pinata
+ * pinFileToIPFS hash). Accepts File (preferred — preserves the
+ * filename for the Pinata-side label) or a bare Blob.
+ *
+ * The `type` parameter is preserved on the caller side; the
+ * evidence-type → on-chain hash association happens when the CID is
+ * submitted via dispute-resolution.add-evidence.
  */
 export async function uploadEvidenceToIPFS(
   file: File | Blob,
-  type: EvidenceType
+  _type: EvidenceType
 ): Promise<string> {
-  // TODO: Implement actual IPFS upload
-  // For now, return a mock hash
-  const formData = new FormData();
-  formData.append('file', file);
-
-  try {
-    // Example using Pinata or other IPFS service
-    const response = await fetch('/api/ipfs/upload', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to upload to IPFS');
-    }
-
-    const data = await response.json();
-    return data.hash;
-  } catch (error) {
-    console.error('IPFS upload error:', error);
-    throw error;
-  }
+  const named =
+    file instanceof File ? file : new File([file], "evidence", { type: file.type });
+  const { hash } = await uploadToIPFS(named);
+  return hash;
 }
 
 /**
@@ -73,15 +64,19 @@ export function ipfsHashToBytes(hash: string): string {
 }
 
 /**
- * Get IPFS gateway URL from hash
+ * Get IPFS gateway URL from a CID. Delegates to the shared gateway
+ * module so the choice of primary gateway lives in one place
+ * (NEXT_PUBLIC_IPFS_GATEWAY).
  */
 export function getIPFSGatewayURL(hash: string): string {
-  const gateway = process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://ipfs.io/ipfs/';
-  return `${gateway}${hash}`;
+  return buildGatewayUrl(hash);
 }
 
 /**
- * Validate evidence before submission
+ * Validate evidence before submission. Delegates the file-level
+ * checks (size, MIME type) to the shared validateEvidenceUpload
+ * so that the picker UI, this helper, and the /api/ipfs/upload
+ * route are all enforcing the same rules.
  */
 export function validateEvidence(
   type: EvidenceType,
@@ -89,38 +84,20 @@ export function validateEvidence(
   description?: string
 ): { valid: boolean; error?: string } {
   if (!description || description.trim().length === 0) {
-    return { valid: false, error: 'Evidence description is required' };
+    return { valid: false, error: "Evidence description is required" };
   }
 
-  if (type === EvidenceType.Image || type === EvidenceType.Video || type === EvidenceType.Document) {
-    if (!file) {
-      return { valid: false, error: 'File is required for this evidence type' };
-    }
-
-    // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024;
-    if (file.size > maxSize) {
-      return { valid: false, error: 'File size exceeds 10MB limit' };
-    }
-
-    // Validate image types
-    if (type === EvidenceType.Image && file.type.startsWith('image/')) {
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-      if (!allowedTypes.includes(file.type)) {
-        return { valid: false, error: 'Invalid image format. Allowed: JPEG, PNG, WebP, GIF' };
-      }
-    }
-
-    // Validate video types
-    if (type === EvidenceType.Video && file.type.startsWith('video/')) {
-      const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime'];
-      if (!allowedTypes.includes(file.type)) {
-        return { valid: false, error: 'Invalid video format. Allowed: MP4, WebM, QuickTime' };
-      }
-    }
+  const requiresFile =
+    type === EvidenceType.Image ||
+    type === EvidenceType.Video ||
+    type === EvidenceType.Document;
+  if (requiresFile && !file) {
+    return { valid: false, error: "File is required for this evidence type" };
   }
+  if (!file) return { valid: true };
 
-  return { valid: true };
+  const result = validateEvidenceUpload(file);
+  return result.ok ? { valid: true } : { valid: false, error: result.reason };
 }
 
 /**
